@@ -272,6 +272,12 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
     <button class="chip" data-genre="game" onclick="setFilter('game',this)">🎮 ألعاب</button>
     <button class="chip" data-genre="app" onclick="setFilter('app',this)">⚙️ تطبيقات</button>
     <button class="chip" data-genre="tool" onclick="setFilter('tool',this)">🧩 أدوات</button>
+    <button class="chip" data-genre="website" onclick="setFilter('website',this)">🌐 مواقع ويب</button>
+    <button class="chip" data-genre="blogger" onclick="setFilter('blogger',this)">📰 قوالب بلوغر</button>
+    <button class="chip" data-genre="script" onclick="setFilter('script',this)">📜 سكربتات</button>
+    <button class="chip" data-genre="islamic" onclick="setFilter('islamic',this)">🕌 إسلامية</button>
+    <button class="chip" data-genre="publishing" onclick="setFilter('publishing',this)">📚 منصات نشر</button>
+    <button class="chip" data-genre="news" onclick="setFilter('news',this)">🗞️ مدونات إخبارية</button>
     <button class="chip" data-genre="other" onclick="setFilter('other',this)">✨ أخرى</button>
   </div>
 
@@ -331,6 +337,12 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
         <option value="game">🎮 لعبة</option>
         <option value="app">⚙️ تطبيق</option>
         <option value="tool">🧩 أداة</option>
+        <option value="website">🌐 موقع ويب</option>
+        <option value="blogger">📰 قالب بلوغر</option>
+        <option value="script">📜 سكربت</option>
+        <option value="islamic">🕌 تطبيق إسلامي</option>
+        <option value="publishing">📚 منصة نشر/قراءة</option>
+        <option value="news">🗞️ مدونة إخبارية</option>
         <option value="other">✨ أخرى</option>
       </select>
     </div>
@@ -406,13 +418,25 @@ let pendingFile = null; // {name, content, size}
 let pendingThumb = null; // {name, dataUrl, size}
 let fbReady = false;
 
-const GENRE_LABELS = { game:'لعبة', app:'تطبيق', tool:'أداة', other:'أخرى' };
-const GENRE_ICON   = { game:'🎮', app:'⚙️', tool:'🧩', other:'✨' };
+const GENRE_LABELS = {
+  game:'لعبة', app:'تطبيق', tool:'أداة', website:'موقع ويب', blogger:'قالب بلوغر',
+  script:'سكربت', islamic:'تطبيق إسلامي', publishing:'منصة نشر', news:'مدونة إخبارية', other:'أخرى'
+};
+const GENRE_ICON = {
+  game:'🎮', app:'⚙️', tool:'🧩', website:'🌐', blogger:'📰',
+  script:'📜', islamic:'🕌', publishing:'📚', news:'🗞️', other:'✨'
+};
 const GENRE_GRADIENT = {
-  game:  'linear-gradient(135deg,#1a0a3a,#4a1a8a)',
-  app:   'linear-gradient(135deg,#0a2a3a,#0a6a8a)',
-  tool:  'linear-gradient(135deg,#2a1a0a,#8a5a1a)',
-  other: 'linear-gradient(135deg,#2a0a2a,#8a1a6a)'
+  game:       'linear-gradient(135deg,#1a0a3a,#4a1a8a)',
+  app:        'linear-gradient(135deg,#0a2a3a,#0a6a8a)',
+  tool:       'linear-gradient(135deg,#2a1a0a,#8a5a1a)',
+  website:    'linear-gradient(135deg,#0a1a3a,#1a5a8a)',
+  blogger:    'linear-gradient(135deg,#3a1a0a,#8a3a1a)',
+  script:     'linear-gradient(135deg,#0a3a2a,#1a8a5a)',
+  islamic:    'linear-gradient(135deg,#1a2a0a,#5a7a1a)',
+  publishing: 'linear-gradient(135deg,#2a0a1a,#7a1a4a)',
+  news:       'linear-gradient(135deg,#0a0a3a,#3a3a8a)',
+  other:      'linear-gradient(135deg,#2a0a2a,#8a1a6a)'
 };
 
 document.addEventListener('fbReady', () => { fbReady = true; loadWorks(); });
