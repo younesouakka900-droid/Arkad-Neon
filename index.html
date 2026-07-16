@@ -95,6 +95,21 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
 .stat b{display:block;font-family:'Cairo';font-size:1.8rem;color:var(--cyan);text-shadow:0 0 18px rgba(0,240,255,.5);}
 .stat span{color:var(--muted);font-size:.85rem;}
 
+/* ---------- شريط البحث والفرز ---------- */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:36px;}
+.search-box{position:relative;flex:1;min-width:220px;max-width:360px;}
+.search-box input{
+  width:100%;padding:11px 40px 11px 14px;border-radius:99px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-family:'Tajawal';font-size:.9rem;
+}
+.search-box input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,240,255,.15);}
+.search-box::after{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5;font-size:.85rem;pointer-events:none;}
+.sort-box select{
+  padding:11px 14px;border-radius:99px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-family:'Tajawal';font-size:.87rem;cursor:pointer;
+}
+.sort-box select:focus{outline:none;border-color:var(--cyan);}
+
 /* ---------- الفلاتر ---------- */
 .filters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:40px 0 30px;}
 .chip{
@@ -141,9 +156,16 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
   display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.5px;
   padding:3px 10px;border-radius:6px;margin-bottom:10px;
 }
+.card-top-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.new-badge{
+  font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:99px;
+  background:linear-gradient(90deg,var(--lime),#8fe000);color:#0a1a00;letter-spacing:.3px;
+}
 .card-title{font-family:'Cairo';font-weight:800;font-size:1.05rem;margin-bottom:6px;}
 .card-desc{color:var(--muted);font-size:.85rem;line-height:1.6;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:16px;}
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:10px;}
+.card-meta{display:flex;gap:14px;color:var(--muted);font-size:.74rem;margin-bottom:14px;}
+.card-meta span{display:flex;align-items:center;gap:4px;}
 .card-actions{display:flex;gap:8px;}
 .btn{
   flex:1;padding:10px;border-radius:10px;border:none;cursor:pointer;
@@ -154,6 +176,17 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
 .btn-play:hover{box-shadow:0 0 18px rgba(0,240,255,.5);}
 .btn-dl{background:var(--surface2);color:var(--text);border:1px solid var(--border);flex:0 0 44px;}
 .btn-dl:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ---------- سكيلتون التحميل ---------- */
+.skeleton-card{border-radius:var(--radius);background:var(--surface);border:1px solid var(--border);overflow:hidden;}
+.skel-thumb{height:150px;background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s infinite;}
+.skel-line{height:12px;border-radius:6px;margin:14px 18px;background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s infinite;}
+.skel-line.w60{width:60%;}
+.skel-line.w90{width:90%;}
+.skel-line.w40{height:32px;width:calc(100% - 36px);border-radius:10px;margin-top:20px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 
 /* ---------- المودال (التشغيل) ---------- */
 .modal-overlay{
@@ -230,6 +263,9 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
 @media(max-width:640px){
   .nav-links{display:none;}
   .hero{padding:60px 0 40px;}
+  .toolbar{flex-direction:column;align-items:stretch;}
+  .search-box{max-width:100%;}
+  .sort-box select{width:100%;}
 }
 </style>
 </head>
@@ -263,6 +299,18 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
       <div class="stat"><b id="statTotal">0</b><span>عمل منشور</span></div>
       <div class="stat"><b id="statGenres">0</b><span>تصنيف</span></div>
     </div>
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ابحث عن عمل بالاسم أو الوصف..." oninput="onSearchInput()">
+      </div>
+      <div class="sort-box">
+        <select id="sortSelect" onchange="onSortChange()">
+          <option value="newest">🕐 الأحدث</option>
+          <option value="oldest">⏳ الأقدم</option>
+          <option value="popular">🔥 الأكثر تشغيلاً</option>
+        </select>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -282,7 +330,9 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
   </div>
 
   <div class="gallery" id="galleryGrid">
-    <div class="spinner" id="loadSpinner"></div>
+    <div class="skeleton-card" id="loadSpinner"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
+    <div class="skeleton-card"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
+    <div class="skeleton-card"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
   </div>
 </div>
 
@@ -378,7 +428,7 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
-  query, orderBy, serverTimestamp
+  query, orderBy, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
@@ -397,7 +447,7 @@ const app = initializeApp(firebaseConfig);
 window._db = getFirestore(app);
 window._auth = getAuth(app);
 window._fbFns = {
-  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp,
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp, increment,
   signInWithEmailAndPassword, onAuthStateChanged, signOut
 };
 window._fb = () => window._fbFns;
@@ -414,6 +464,8 @@ document.dispatchEvent(new Event('fbReady'));
 <script>
 let works = [];
 let currentFilter = 'all';
+let searchTerm = '';
+let sortMode = 'newest';
 let pendingFile = null; // {name, content, size}
 let pendingThumb = null; // {name, dataUrl, size}
 let fbReady = false;
@@ -470,6 +522,13 @@ async function loadWorks(){
   if(spinner) spinner.remove();
   updateStats();
   renderGallery();
+  openSharedWorkFromUrl();
+}
+
+function openSharedWorkFromUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('work');
+  if(id && works.some(w => w.id === id)) playWork(id);
 }
 
 function updateStats(){
@@ -480,34 +539,106 @@ function updateStats(){
 /* ---------------- عرض المعرض ---------------- */
 function renderGallery(){
   const grid = document.getElementById('galleryGrid');
-  const list = currentFilter === 'all' ? works : works.filter(w => w.genre === currentFilter);
+  let list = currentFilter === 'all' ? works.slice() : works.filter(w => w.genre === currentFilter);
+
+  if(searchTerm){
+    const t = searchTerm.toLowerCase();
+    list = list.filter(w =>
+      (w.title||'').toLowerCase().includes(t) ||
+      (w.description||'').toLowerCase().includes(t)
+    );
+  }
+
+  list = sortWorks(list, sortMode);
 
   if(list.length === 0){
-    grid.innerHTML = `<div class="empty-state"><b>لا توجد أعمال بعد</b>ستظهر الأعمال هنا فور نشرها من لوحة التحكم.</div>`;
+    grid.innerHTML = `<div class="empty-state"><b>لا توجد نتائج</b>${searchTerm ? 'جرّب كلمة بحث مختلفة.' : 'ستظهر الأعمال هنا فور نشرها من لوحة التحكم.'}</div>`;
     return;
   }
 
-  grid.innerHTML = list.map(w => `
+  grid.innerHTML = list.map(w => {
+    const isNew = w.createdAt && isWithinDays(w.createdAt, 7);
+    const views = w.viewCount || 0;
+    const sizeKb = w.size ? (w.size/1024).toFixed(1) : null;
+    return `
     <div class="card">
       <div class="card-inner">
         <div class="thumb" style="${w.thumbnail ? '' : `background:${GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other}`}">
           ${w.thumbnail
-            ? `<img src="${w.thumbnail}" alt="${escapeHtml(w.title)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`
+            ? `<img src="${w.thumbnail}" alt="${escapeHtml(w.title)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`
             : `<span>${GENRE_ICON[w.genre]||'✨'}</span>`}
         </div>
         <div class="card-body">
-          <span class="card-tag" style="background:rgba(0,240,255,.12);color:var(--cyan)">${GENRE_LABELS[w.genre]||'أخرى'}</span>
+          <div class="card-top-row">
+            <span class="card-tag" style="background:rgba(0,240,255,.12);color:var(--cyan)">${GENRE_LABELS[w.genre]||'أخرى'}</span>
+            ${isNew ? `<span class="new-badge">جديد</span>` : ''}
+          </div>
           <div class="card-title">${escapeHtml(w.title)}</div>
           <div class="card-desc">${escapeHtml(w.description||'بدون وصف')}</div>
+          <div class="card-meta">
+            <span>▶ ${views}</span>
+            ${sizeKb ? `<span>💾 ${sizeKb} ك.ب</span>` : ''}
+          </div>
           <div class="card-actions">
             <button class="btn btn-play" onclick="playWork('${w.id}')">▶ تشغيل</button>
+            <button class="btn btn-dl" onclick="shareWork('${w.id}')" title="مشاركة">🔗</button>
             <button class="btn btn-dl" onclick="copyWorkCode('${w.id}')" title="نسخ الكود">⧉</button>
             <button class="btn btn-dl" onclick="downloadWork('${w.id}')" title="تحميل">⬇</button>
           </div>
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
+}
+
+function sortWorks(list, mode){
+  const toMillis = (ts) => ts && ts.toMillis ? ts.toMillis() : (ts && ts.seconds ? ts.seconds*1000 : 0);
+  const arr = list.slice();
+  if(mode === 'oldest') arr.sort((a,b) => toMillis(a.createdAt) - toMillis(b.createdAt));
+  else if(mode === 'popular') arr.sort((a,b) => (b.viewCount||0) - (a.viewCount||0));
+  else arr.sort((a,b) => toMillis(b.createdAt) - toMillis(a.createdAt)); // newest (default order from query already, but re-sort after search/filter)
+  return arr;
+}
+
+function isWithinDays(ts, days){
+  const ms = ts && ts.toMillis ? ts.toMillis() : (ts && ts.seconds ? ts.seconds*1000 : 0);
+  if(!ms) return false;
+  return (Date.now() - ms) < days*24*60*60*1000;
+}
+
+function onSearchInput(){
+  searchTerm = document.getElementById('searchInput').value.trim();
+  renderGallery();
+}
+
+function onSortChange(){
+  sortMode = document.getElementById('sortSelect').value;
+  renderGallery();
+}
+
+async function shareWork(id){
+  const w = works.find(x=>x.id===id);
+  if(!w) return;
+  const url = `${window.location.origin}${window.location.pathname}?work=${id}`;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(url);
+    }else{
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast('تم نسخ رابط المشاركة 🔗');
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر نسخ الرابط', true);
+  }
 }
 
 function escapeHtml(s){
@@ -534,6 +665,19 @@ async function playWork(id){
   }catch(err){
     console.error(err);
     showToast('تعذّر تشغيل الملف', true);
+  }
+  trackView(w);
+}
+
+async function trackView(w){
+  w.viewCount = (w.viewCount || 0) + 1;
+  renderGallery();
+  if(!fbReady) return;
+  try{
+    const { doc, updateDoc, increment } = window._fb();
+    await updateDoc(doc(window._db, 'works', w.id), { viewCount: increment(1) });
+  }catch(err){
+    console.error('تعذّر تحديث عداد المشاهدات', err);
   }
 }
 function closePlay(){
@@ -770,7 +914,7 @@ function renderAdminList(){
     <div class="admin-row">
       <div class="info">
         <b>${escapeHtml(w.title)}</b>
-        <span>${GENRE_LABELS[w.genre]||'أخرى'} · ${w.size ? (w.size/1024).toFixed(1)+' كيلوبايت' : ''}</span>
+        <span>${GENRE_LABELS[w.genre]||'أخرى'} · ${w.size ? (w.size/1024).toFixed(1)+' كيلوبايت' : ''} · ▶ ${w.viewCount||0}</span>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
         <button class="del-btn" style="color:var(--cyan)" onclick="editWork('${w.id}')">تعديل</button>
