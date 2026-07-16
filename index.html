@@ -345,7 +345,15 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
       </div>
       <input type="file" id="fFile" accept=".html,text/html" style="display:none" onchange="onFileSelect(event)">
     </div>
+    <div class="field">
+      <label>صورة مصغّرة (اختياري)</label>
+      <div class="file-drop" id="thumbDrop" onclick="document.getElementById('fThumb').click()">
+        🖼️ اضغط لاختيار صورة — إن لم تُضف، ستظهر أيقونة افتراضية
+      </div>
+      <input type="file" id="fThumb" accept="image/*" style="display:none" onchange="onThumbSelect(event)">
+    </div>
     <button class="submit-btn" id="uploadBtn" onclick="uploadWork()">نشر العمل</button>
+    <button class="link-btn" id="cancelEditBtn" onclick="clearForm()" style="display:none">إلغاء التعديل والعودة لنشر عمل جديد</button>
 
     <div class="admin-list" id="adminList"></div>
   </div>
@@ -357,7 +365,7 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
+  getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc,
   query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
@@ -377,7 +385,7 @@ const app = initializeApp(firebaseConfig);
 window._db = getFirestore(app);
 window._auth = getAuth(app);
 window._fbFns = {
-  collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp,
+  collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy, serverTimestamp,
   signInWithEmailAndPassword, onAuthStateChanged, signOut
 };
 window._fb = () => window._fbFns;
@@ -395,6 +403,7 @@ document.dispatchEvent(new Event('fbReady'));
 let works = [];
 let currentFilter = 'all';
 let pendingFile = null; // {name, content, size}
+let pendingThumb = null; // {name, dataUrl, size}
 let fbReady = false;
 
 const GENRE_LABELS = { game:'لعبة', app:'تطبيق', tool:'أداة', other:'أخرى' };
@@ -457,8 +466,10 @@ function renderGallery(){
   grid.innerHTML = list.map(w => `
     <div class="card">
       <div class="card-inner">
-        <div class="thumb" style="background:${GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other}">
-          <span>${GENRE_ICON[w.genre]||'✨'}</span>
+        <div class="thumb" style="${w.thumbnail ? '' : `background:${GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other}`}">
+          ${w.thumbnail
+            ? `<img src="${w.thumbnail}" alt="${escapeHtml(w.title)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`
+            : `<span>${GENRE_ICON[w.genre]||'✨'}</span>`}
         </div>
         <div class="card-body">
           <span class="card-tag" style="background:rgba(0,240,255,.12);color:var(--cyan)">${GENRE_LABELS[w.genre]||'أخرى'}</span>
@@ -466,6 +477,7 @@ function renderGallery(){
           <div class="card-desc">${escapeHtml(w.description||'بدون وصف')}</div>
           <div class="card-actions">
             <button class="btn btn-play" onclick="playWork('${w.id}')">▶ تشغيل</button>
+            <button class="btn btn-dl" onclick="copyWorkCode('${w.id}')" title="نسخ الكود">⧉</button>
             <button class="btn btn-dl" onclick="downloadWork('${w.id}')" title="تحميل">⬇</button>
           </div>
         </div>
@@ -508,16 +520,44 @@ function toggleFrameFullscreen(){
   const f = document.getElementById('playFrame');
   if(f.requestFullscreen) f.requestFullscreen();
 }
+async function copyWorkCode(id){
+  const w = works.find(x=>x.id===id);
+  if(!w || !w.html) return;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(w.html);
+    }else{
+      const ta = document.createElement('textarea');
+      ta.value = w.html;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast('تم نسخ الكود إلى الحافظة ✅');
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر نسخ الكود', true);
+  }
+}
+
 async function downloadWork(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
   try{
     const blob = new Blob([w.html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (w.title || 'work') + '.html';
+    a.href = url;
+    a.download = (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.html';
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
   }catch(err){
+    console.error(err);
     showToast('تعذّر تحميل الملف', true);
   }
 }
@@ -573,7 +613,27 @@ function onFileSelect(e){
   reader.readAsText(file);
 }
 
-const MAX_HTML_SIZE = 900 * 1024; // هامش أمان تحت حد الميغابايت لـ Firestore
+const MAX_THUMB_SIZE = 350 * 1024; // حد أقصى للصورة قبل الترميز
+
+function onThumbSelect(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > MAX_THUMB_SIZE){
+    showToast('الصورة كبيرة جدًا (الحد الأقصى ~350 كيلوبايت)', true);
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    pendingThumb = { name:file.name, dataUrl:reader.result, size:file.size };
+    const drop = document.getElementById('thumbDrop');
+    drop.textContent = `✅ ${file.name} (${(file.size/1024).toFixed(1)} كيلوبايت)`;
+    drop.classList.add('has-file');
+  };
+  reader.readAsDataURL(file);
+}
+
+const MAX_HTML_SIZE = 900 * 1024; // هامش أمان تحت حد الميغابايت لـ Firestore (لكامل المستند)
 
 async function uploadWork(){
   if(!window._currentUser){ showToast('يجب تسجيل الدخول أولًا', true); return; }
@@ -582,33 +642,79 @@ async function uploadWork(){
   const desc  = document.getElementById('fDesc').value.trim();
 
   if(!title){ showToast('أدخل عنوان العمل', true); return; }
-  if(!pendingFile){ showToast('اختر ملف HTML أولًا', true); return; }
-  if(pendingFile.size > MAX_HTML_SIZE){
-    showToast('الملف كبير جدًا (الحد الأقصى ~900 كيلوبايت)', true);
+  // بوضع التعديل: ملف الـ HTML اختياري (نحتفظ بالقديم إن لم يُستبدل)
+  if(!editingId && !pendingFile){ showToast('اختر ملف HTML أولًا', true); return; }
+
+  const htmlSize  = pendingFile ? pendingFile.size : (editingOriginal?.size || 0);
+  const thumbSize = pendingThumb ? pendingThumb.dataUrl.length : 0;
+  if(htmlSize + thumbSize > MAX_HTML_SIZE){
+    showToast('حجم الملف + الصورة كبير جدًا (الحد الإجمالي ~900 كيلوبايت)', true);
     return;
   }
 
   const btn = document.getElementById('uploadBtn');
-  btn.disabled = true; btn.textContent = 'جاري النشر...';
+  btn.disabled = true; btn.textContent = editingId ? 'جاري الحفظ...' : 'جاري النشر...';
 
   try{
-    const { collection, addDoc, serverTimestamp } = window._fb();
-    await addDoc(collection(window._db, 'works'), {
-      title, genre, description:desc,
-      html: pendingFile.content,
-      size: pendingFile.size,
-      createdAt: serverTimestamp()
-    });
+    const { collection, addDoc, doc, updateDoc, serverTimestamp } = window._fb();
 
-    showToast('تم نشر العمل بنجاح ✨');
+    if(editingId){
+      // تعديل عمل موجود — نحدّث فقط الحقول اللي تغيّرت
+      const updates = { title, genre, description:desc };
+      if(pendingFile){ updates.html = pendingFile.content; updates.size = pendingFile.size; }
+      if(pendingThumb){ updates.thumbnail = pendingThumb.dataUrl; }
+      await updateDoc(doc(window._db, 'works', editingId), updates);
+      showToast('تم حفظ التعديلات ✨');
+    }else{
+      // نشر عمل جديد
+      await addDoc(collection(window._db, 'works'), {
+        title, genre, description:desc,
+        html: pendingFile.content,
+        thumbnail: pendingThumb ? pendingThumb.dataUrl : null,
+        size: pendingFile.size,
+        createdAt: serverTimestamp()
+      });
+      showToast('تم نشر العمل بنجاح ✨');
+    }
+
     clearForm();
     await loadWorks();
     renderAdminList();
   }catch(err){
     console.error(err);
-    showToast('حدث خطأ أثناء الرفع', true);
+    showToast('حدث خطأ أثناء الحفظ', true);
   }
-  btn.disabled = false; btn.textContent = 'نشر العمل';
+  btn.disabled = false; btn.textContent = editingId ? 'حفظ التعديلات' : 'نشر العمل';
+}
+
+let editingId = null;
+let editingOriginal = null;
+
+function editWork(id){
+  const w = works.find(x=>x.id===id);
+  if(!w) return;
+  editingId = id;
+  editingOriginal = w;
+  pendingFile = null;
+  pendingThumb = null;
+
+  document.getElementById('fTitle').value = w.title || '';
+  document.getElementById('fGenre').value = w.genre || 'game';
+  document.getElementById('fDesc').value = w.description || '';
+
+  const drop = document.getElementById('fileDrop');
+  drop.textContent = `📄 الملف الحالي محفوظ (${w.size ? (w.size/1024).toFixed(1)+' ك.ب' : ''}) — اضغط لاستبداله فقط إن أردت`;
+  drop.classList.remove('has-file');
+
+  const tdrop = document.getElementById('thumbDrop');
+  tdrop.textContent = w.thumbnail ? '🖼️ توجد صورة محفوظة — اضغط لاستبدالها فقط إن أردت' : '🖼️ اضغط لإضافة صورة';
+  tdrop.classList.remove('has-file');
+
+  document.getElementById('uploadBtn').textContent = 'حفظ التعديلات';
+  document.getElementById('cancelEditBtn').style.display = 'block';
+
+  document.querySelector('.admin-panel').scrollTo({top:0, behavior:'smooth'});
+  showToast(`تعديل: ${w.title}`);
 }
 
 function clearForm(){
@@ -616,13 +722,23 @@ function clearForm(){
   document.getElementById('fDesc').value = '';
   document.getElementById('fGenre').value = 'game';
   document.getElementById('fFile').value = '';
+  document.getElementById('fThumb').value = '';
   pendingFile = null;
+  pendingThumb = null;
+  editingId = null;
+  editingOriginal = null;
   const drop = document.getElementById('fileDrop');
   drop.textContent = '📄 اضغط لاختيار ملف HTML';
   drop.classList.remove('has-file');
+  const tdrop = document.getElementById('thumbDrop');
+  tdrop.textContent = '🖼️ اضغط لاختيار صورة — إن لم تُضف، ستظهر أيقونة افتراضية';
+  tdrop.classList.remove('has-file');
+  document.getElementById('uploadBtn').textContent = 'نشر العمل';
+  document.getElementById('cancelEditBtn').style.display = 'none';
 }
 
-/* ---------------- إدارة القائمة (حذف) ---------------- */
+
+/* ---------------- إدارة القائمة (تعديل / حذف) ---------------- */
 function renderAdminList(){
   const list = document.getElementById('adminList');
   if(!works.length){ list.innerHTML = '<p style="color:var(--muted);font-size:.85rem">لا توجد أعمال منشورة بعد.</p>'; return; }
@@ -632,7 +748,10 @@ function renderAdminList(){
         <b>${escapeHtml(w.title)}</b>
         <span>${GENRE_LABELS[w.genre]||'أخرى'} · ${w.size ? (w.size/1024).toFixed(1)+' كيلوبايت' : ''}</span>
       </div>
-      <button class="del-btn" onclick="deleteWork('${w.id}')">حذف</button>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="del-btn" style="color:var(--cyan)" onclick="editWork('${w.id}')">تعديل</button>
+        <button class="del-btn" onclick="deleteWork('${w.id}')">حذف</button>
+      </div>
     </div>
   `).join('');
 }
