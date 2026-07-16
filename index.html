@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أركيد نيون | معرض الأعمال التفاعلية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+@property --a{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
+
+:root{
+  --bg:      #050110;
+  --bg2:     #0a0620;
+  --surface: #0f0a24;
+  --surface2:#160f34;
+  --border:  rgba(255,255,255,.08);
+  --text:    #eae6f8;
+  --muted:   #7d76a0;
+  --cyan:    #00f0ff;
+  --magenta: #ff2bd6;
+  --violet:  #8b2ffb;
+  --lime:    #c6ff3d;
+  --radius:  18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Tajawal',sans-serif;
+  min-height:100vh; overflow-x:hidden;
+  position:relative;
+}
+
+/* ---------- خلفية الشبكة المتحركة ---------- */
+.bg-fx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.grid-floor{
+  position:absolute; left:-20%; right:-20%; bottom:-10%; height:70%;
+  background-image:
+    linear-gradient(rgba(0,240,255,.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,.35) 1px, transparent 1px);
+  background-size:56px 56px;
+  transform:perspective(280px) rotateX(62deg);
+  -webkit-mask-image:linear-gradient(to top, black 10%, transparent 85%);
+  mask-image:linear-gradient(to top, black 10%, transparent 85%);
+  animation:gridMove 2.4s linear infinite;
+}
+@keyframes gridMove{from{background-position:0 0,0 0;}to{background-position:0 56px,56px 0;}}
+
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.18;animation:float ease-in-out infinite;}
+.orb1{width:520px;height:520px;background:var(--violet);top:-160px;right:-120px;animation-duration:14s;}
+.orb2{width:420px;height:420px;background:var(--cyan);bottom:-100px;left:-100px;animation-duration:18s;animation-delay:-6s;}
+.orb3{width:340px;height:340px;background:var(--magenta);top:40%;left:35%;animation-duration:11s;animation-delay:-3s;}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(30px,-24px) scale(1.06);}}
+
+.scanline{position:absolute;inset:0;background:repeating-linear-gradient(to bottom, rgba(255,255,255,.02) 0 1px, transparent 1px 3px);}
+
+/* ---------- عام ---------- */
+.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 24px;}
+h1,h2,h3,.logo{font-family:'Cairo',sans-serif;}
+
+/* ---------- الهيدر ---------- */
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rgba(5,1,16,.55);border-bottom:1px solid var(--border);}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;max-width:1180px;margin:0 auto;}
+.logo{font-weight:900;font-size:1.4rem;letter-spacing:.5px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet),var(--magenta));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:flex;align-items:center;gap:8px;}
+.logo::before{content:'◈';color:var(--cyan);-webkit-text-fill-color:var(--cyan);filter:drop-shadow(0 0 8px var(--cyan));}
+.nav-links{display:flex;gap:28px;align-items:center;}
+.nav-links a{color:var(--muted);text-decoration:none;font-weight:500;font-size:.95rem;transition:color .2s;}
+.nav-links a:hover{color:var(--cyan);}
+.admin-btn{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--muted);cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
+.admin-btn:hover{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 14px rgba(0,240,255,.35);}
+
+/* ---------- الهيرو ---------- */
+.hero{position:relative;padding:90px 0 60px;text-align:center;}
+.eyebrow{
+  display:inline-block;font-size:.8rem;letter-spacing:2px;color:var(--lime);
+  border:1px solid rgba(198,255,61,.35);padding:6px 16px;border-radius:99px;
+  margin-bottom:22px;background:rgba(198,255,61,.06);
+}
+.hero h1{
+  font-size:clamp(2.2rem,6vw,4.2rem);font-weight:900;line-height:1.15;
+  background:linear-gradient(100deg,var(--text) 30%,var(--cyan) 55%,var(--magenta) 80%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 60px rgba(139,47,251,.25);
+}
+.hero p{color:var(--muted);font-size:1.1rem;max-width:560px;margin:20px auto 0;}
+.hero-stats{display:flex;justify-content:center;gap:40px;margin-top:36px;flex-wrap:wrap;}
+.stat b{display:block;font-family:'Cairo';font-size:1.8rem;color:var(--cyan);text-shadow:0 0 18px rgba(0,240,255,.5);}
+.stat span{color:var(--muted);font-size:.85rem;}
+
+/* ---------- الفلاتر ---------- */
+.filters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:40px 0 30px;}
+.chip{
+  padding:9px 20px;border-radius:99px;border:1px solid var(--border);
+  background:var(--surface);color:var(--muted);cursor:pointer;font-size:.9rem;font-weight:500;
+  transition:.2s;
+}
+.chip:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
+.chip.active{
+  color:var(--bg);background:linear-gradient(90deg,var(--cyan),var(--violet));
+  border-color:transparent;font-weight:700;
+  box-shadow:0 0 20px rgba(139,47,251,.5);
+}
+
+/* ---------- الشبكة والبطاقات ---------- */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px;padding:10px 0 90px;}
+.empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-state b{display:block;color:var(--text);font-family:'Cairo';font-size:1.2rem;margin-bottom:8px;}
+
+.card{
+  position:relative;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--border);
+  overflow:hidden;transition:transform .25s;
+}
+.card:hover{transform:translateY(-6px);}
+.card::before{
+  content:'';position:absolute;inset:-2px;border-radius:calc(var(--radius) + 2px);
+  background:conic-gradient(from var(--a,0deg),var(--cyan),var(--violet),var(--magenta),var(--cyan));
+  z-index:0;opacity:0;transition:opacity .35s;animation:spin 3.5s linear infinite;
+}
+.card:hover::before{opacity:1;}
+@keyframes spin{to{--a:360deg;}}
+.card-inner{position:relative;z-index:1;background:var(--surface);border-radius:var(--radius);height:100%;}
+
+.thumb{
+  height:150px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;font-size:2.6rem;
+}
+.thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(15,10,36,.9));}
+.thumb span{position:relative;z-index:1;filter:drop-shadow(0 0 12px rgba(0,0,0,.4));}
+
+.card-body{padding:18px;}
+.card-tag{
+  display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.5px;
+  padding:3px 10px;border-radius:6px;margin-bottom:10px;
+}
+.card-title{font-family:'Cairo';font-weight:800;font-size:1.05rem;margin-bottom:6px;}
+.card-desc{color:var(--muted);font-size:.85rem;line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:16px;}
+.card-actions{display:flex;gap:8px;}
+.btn{
+  flex:1;padding:10px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Tajawal';font-weight:700;font-size:.85rem;transition:.2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-play{background:linear-gradient(90deg,var(--cyan),var(--violet));color:#050110;}
+.btn-play:hover{box-shadow:0 0 18px rgba(0,240,255,.5);}
+.btn-dl{background:var(--surface2);color:var(--text);border:1px solid var(--border);flex:0 0 44px;}
+.btn-dl:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ---------- المودال (التشغيل) ---------- */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(2,0,8,.85);backdrop-filter:blur(6px);
+  z-index:100;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.show{display:flex;}
+.play-modal{width:100%;height:100%;max-width:1200px;max-height:800px;display:flex;flex-direction:column;
+  background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.play-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border);}
+.play-head b{font-family:'Cairo';}
+.icon-btn{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 10px;}
+.icon-btn:hover{color:var(--magenta);}
+.play-frame{flex:1;border:none;width:100%;background:#000;}
+
+/* ---------- نافذة الدخول ---------- */
+.small-modal{
+  width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:28px;position:relative;
+}
+.small-modal h2{font-family:'Cairo';margin-bottom:6px;font-size:1.3rem;}
+.small-modal p.hint{color:var(--muted);font-size:.85rem;margin-bottom:20px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:6px;}
+.field input, .field textarea, .field select{
+  width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text);font-family:'Tajawal';font-size:.9rem;
+}
+.field input:focus, .field textarea:focus, .field select:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,240,255,.15);}
+.field textarea{resize:vertical;min-height:70px;}
+.submit-btn{
+  width:100%;padding:12px;border:none;border-radius:10px;cursor:pointer;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));color:#050110;
+  font-weight:800;font-family:'Cairo';font-size:.95rem;margin-top:6px;
+}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+.link-btn{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;text-decoration:underline;margin-top:10px;}
+
+/* ---------- لوحة التحكم ---------- */
+.admin-panel{width:100%;max-width:640px;max-height:85vh;overflow-y:auto;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
+.admin-panel h2{font-family:'Cairo';margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
+.file-drop{
+  border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;color:var(--muted);
+  cursor:pointer;font-size:.88rem;transition:.2s;margin-bottom:14px;
+}
+.file-drop:hover{border-color:var(--cyan);color:var(--cyan);}
+.file-drop.has-file{border-color:var(--lime);color:var(--lime);border-style:solid;}
+.admin-list{margin-top:24px;border-top:1px solid var(--border);padding-top:18px;}
+.admin-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;}
+.admin-row .info{flex:1;min-width:0;}
+.admin-row .info b{font-size:.9rem;display:block;}
+.admin-row .info span{font-size:.75rem;color:var(--muted);}
+.del-btn{background:none;border:1px solid var(--border);color:var(--magenta);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;}
+.del-btn:hover{background:rgba(255,43,214,.1);border-color:var(--magenta);}
+
+/* ---------- توست ---------- */
+.toast{
+  position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  padding:13px 22px;border-radius:12px;font-size:.9rem;z-index:200;opacity:0;
+  transition:.3s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.err{border-color:var(--magenta);color:var(--magenta);}
+
+/* ---------- فوتر ---------- */
+footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color:var(--muted);font-size:.85rem;}
+
+/* ---------- سبينر ---------- */
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:sp .7s linear infinite;margin:40px auto;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+@media(max-width:640px){
+  .nav-links{display:none;}
+  .hero{padding:60px 0 40px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-fx">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="grid-floor"></div>
+  <div class="scanline"></div>
+</div>
+
+<header>
+  <div class="nav">
+    <div class="logo">أركيد نيون</div>
+    <div class="nav-links">
+      <a href="#gallery">المعرض</a>
+      <a href="#" onclick="scrollToTop();return false;">الرئيسية</a>
+    </div>
+    <button class="admin-btn" onclick="openAuthModal()" title="دخول المشرف">🔒</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow">تجارب تفاعلية حية</span>
+    <h1>عوالم مبنية بملف واحد<br>تُفتح بضغطة واحدة</h1>
+    <p>معرض مصغّر لأعمال HTML تفاعلية — ألعاب، تطبيقات، وتجارب — شغّلها فورًا في المتصفح أو نزّلها لجهازك.</p>
+    <div class="hero-stats">
+      <div class="stat"><b id="statTotal">0</b><span>عمل منشور</span></div>
+      <div class="stat"><b id="statGenres">0</b><span>تصنيف</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap" id="gallery">
+  <div class="filters" id="filterBar">
+    <button class="chip active" data-genre="all" onclick="setFilter('all',this)">الكل</button>
+    <button class="chip" data-genre="game" onclick="setFilter('game',this)">🎮 ألعاب</button>
+    <button class="chip" data-genre="app" onclick="setFilter('app',this)">⚙️ تطبيقات</button>
+    <button class="chip" data-genre="tool" onclick="setFilter('tool',this)">🧩 أدوات</button>
+    <button class="chip" data-genre="other" onclick="setFilter('other',this)">✨ أخرى</button>
+  </div>
+
+  <div class="gallery" id="galleryGrid">
+    <div class="spinner" id="loadSpinner"></div>
+  </div>
+</div>
+
+<footer>أركيد نيون — معرض تفاعلي مبني بملف واحد ⚡</footer>
+
+<!-- مودال التشغيل -->
+<div class="modal-overlay" id="playOverlay">
+  <div class="play-modal">
+    <div class="play-head">
+      <b id="playTitle">—</b>
+      <div>
+        <button class="icon-btn" onclick="toggleFrameFullscreen()" title="ملء الشاشة">⤢</button>
+        <button class="icon-btn" onclick="closePlay()" title="إغلاق">✕</button>
+      </div>
+    </div>
+    <iframe class="play-frame" id="playFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
+  </div>
+</div>
+
+<!-- مودال دخول المشرف -->
+<div class="modal-overlay" id="authOverlay">
+  <div class="small-modal">
+    <button class="icon-btn" style="position:absolute;top:10px;left:10px;" onclick="closeModal('authOverlay')">✕</button>
+    <h2>دخول المشرف</h2>
+    <p class="hint">هذه اللوحة مخصّصة لصاحب الموقع فقط لإدارة الأعمال المنشورة.</p>
+    <div class="field">
+      <label>البريد الإلكتروني</label>
+      <input type="email" id="authEmail" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input type="password" id="authPass" placeholder="••••••••">
+    </div>
+    <button class="submit-btn" id="authSubmitBtn" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- لوحة تحكم المشرف -->
+<div class="modal-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <h2>لوحة التحكم
+      <button class="icon-btn" onclick="doLogout()" title="خروج">⎋</button>
+    </h2>
+
+    <div class="field">
+      <label>عنوان العمل</label>
+      <input type="text" id="fTitle" placeholder="مثال: مغامرة الصحراء">
+    </div>
+    <div class="field">
+      <label>التصنيف</label>
+      <select id="fGenre">
+        <option value="game">🎮 لعبة</option>
+        <option value="app">⚙️ تطبيق</option>
+        <option value="tool">🧩 أداة</option>
+        <option value="other">✨ أخرى</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>وصف مختصر</label>
+      <textarea id="fDesc" placeholder="جملة أو جملتين عن العمل..."></textarea>
+    </div>
+    <div class="field">
+      <label>ملف index.html</label>
+      <div class="file-drop" id="fileDrop" onclick="document.getElementById('fFile').click()">
+        📄 اضغط لاختيار ملف HTML
+      </div>
+      <input type="file" id="fFile" accept=".html,text/html" style="display:none" onchange="onFileSelect(event)">
+    </div>
+    <button class="submit-btn" id="uploadBtn" onclick="uploadWork()">نشر العمل</button>
+
+    <div class="admin-list" id="adminList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ Firebase (module) ============ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, deleteDoc, doc,
+  query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD427QlV9kMZc7Gcg5Wvsmzh-ZS0bTtLh0",
+  authDomain: "neon-arcade-c543f.firebaseapp.com",
+  projectId: "neon-arcade-c543f",
+  storageBucket: "neon-arcade-c543f.firebasestorage.app",
+  messagingSenderId: "1078403754158",
+  appId: "1:1078403754158:web:3a4638c21b505c4c84e53f"
+};
+
+const app = initializeApp(firebaseConfig);
+window._db = getFirestore(app);
+window._auth = getAuth(app);
+window._fbFns = {
+  collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, serverTimestamp,
+  signInWithEmailAndPassword, onAuthStateChanged, signOut
+};
+window._fb = () => window._fbFns;
+
+onAuthStateChanged(window._auth, (user) => {
+  window._currentUser = user;
+  document.dispatchEvent(new CustomEvent('authChanged', { detail: user }));
+});
+
+document.dispatchEvent(new Event('fbReady'));
+</script>
+
+<!-- ============ منطق الواجهة ============ -->
+<script>
+let works = [];
+let currentFilter = 'all';
+let pendingFile = null; // {name, content, size}
+let fbReady = false;
+
+const GENRE_LABELS = { game:'لعبة', app:'تطبيق', tool:'أداة', other:'أخرى' };
+const GENRE_ICON   = { game:'🎮', app:'⚙️', tool:'🧩', other:'✨' };
+const GENRE_GRADIENT = {
+  game:  'linear-gradient(135deg,#1a0a3a,#4a1a8a)',
+  app:   'linear-gradient(135deg,#0a2a3a,#0a6a8a)',
+  tool:  'linear-gradient(135deg,#2a1a0a,#8a5a1a)',
+  other: 'linear-gradient(135deg,#2a0a2a,#8a1a6a)'
+};
+
+document.addEventListener('fbReady', () => { fbReady = true; loadWorks(); });
+document.addEventListener('authChanged', (e) => {
+  const user = e.detail;
+  if (user) { renderAdminList(); }
+});
+
+function showToast(msg, isErr=false){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr ? ' err' : '');
+  setTimeout(()=>{ t.className='toast'; }, 2600);
+}
+
+function scrollToTop(){ window.scrollTo({top:0, behavior:'smooth'}); }
+
+/* ---------------- تحميل الأعمال ---------------- */
+async function loadWorks(){
+  const spinner = document.getElementById('loadSpinner');
+  try{
+    const { collection, getDocs, query, orderBy } = window._fb();
+    const q = query(collection(window._db, 'works'), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    works = [];
+    snap.forEach(d => works.push({ id:d.id, ...d.data() }));
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر تحميل الأعمال — تحقق من إعدادات Firebase', true);
+  }
+  if(spinner) spinner.remove();
+  updateStats();
+  renderGallery();
+}
+
+function updateStats(){
+  document.getElementById('statTotal').textContent = works.length;
+  document.getElementById('statGenres').textContent = new Set(works.map(w=>w.genre)).size;
+}
+
+/* ---------------- عرض المعرض ---------------- */
+function renderGallery(){
+  const grid = document.getElementById('galleryGrid');
+  const list = currentFilter === 'all' ? works : works.filter(w => w.genre === currentFilter);
+
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty-state"><b>لا توجد أعمال بعد</b>ستظهر الأعمال هنا فور نشرها من لوحة التحكم.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(w => `
+    <div class="card">
+      <div class="card-inner">
+        <div class="thumb" style="background:${GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other}">
+          <span>${GENRE_ICON[w.genre]||'✨'}</span>
+        </div>
+        <div class="card-body">
+          <span class="card-tag" style="background:rgba(0,240,255,.12);color:var(--cyan)">${GENRE_LABELS[w.genre]||'أخرى'}</span>
+          <div class="card-title">${escapeHtml(w.title)}</div>
+          <div class="card-desc">${escapeHtml(w.description||'بدون وصف')}</div>
+          <div class="card-actions">
+            <button class="btn btn-play" onclick="playWork('${w.id}')">▶ تشغيل</button>
+            <button class="btn btn-dl" onclick="downloadWork('${w.id}')" title="تحميل">⬇</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function setFilter(genre, btn){
+  currentFilter = genre;
+  document.querySelectorAll('#filterBar .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderGallery();
+}
+
+/* ---------------- تشغيل / تحميل عمل ---------------- */
+async function playWork(id){
+  const w = works.find(x=>x.id===id);
+  if(!w || !w.html) return;
+  try{
+    const blob = new Blob([w.html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    document.getElementById('playTitle').textContent = w.title;
+    document.getElementById('playFrame').src = url;
+    document.getElementById('playOverlay').classList.add('show');
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر تشغيل الملف', true);
+  }
+}
+function closePlay(){
+  document.getElementById('playOverlay').classList.remove('show');
+  document.getElementById('playFrame').src = 'about:blank';
+}
+function toggleFrameFullscreen(){
+  const f = document.getElementById('playFrame');
+  if(f.requestFullscreen) f.requestFullscreen();
+}
+async function downloadWork(id){
+  const w = works.find(x=>x.id===id);
+  if(!w || !w.html) return;
+  try{
+    const blob = new Blob([w.html], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (w.title || 'work') + '.html';
+    a.click();
+  }catch(err){
+    showToast('تعذّر تحميل الملف', true);
+  }
+}
+
+/* ---------------- المودالات ---------------- */
+function openAuthModal(){
+  if(window._currentUser){ openAdminPanel(); return; }
+  document.getElementById('authOverlay').classList.add('show');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function openAdminPanel(){
+  closeModal('authOverlay');
+  document.getElementById('adminOverlay').classList.add('show');
+  renderAdminList();
+}
+
+/* ---------------- تسجيل الدخول ---------------- */
+async function doLogin(){
+  const email = document.getElementById('authEmail').value.trim();
+  const pass  = document.getElementById('authPass').value;
+  if(!email || !pass){ showToast('أدخل البريد وكلمة المرور', true); return; }
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true; btn.textContent = 'جاري الدخول...';
+  try{
+    const { signInWithEmailAndPassword } = window._fb();
+    await signInWithEmailAndPassword(window._auth, email, pass);
+    showToast('تم تسجيل الدخول بنجاح');
+    openAdminPanel();
+  }catch(err){
+    console.error(err);
+    showToast('بيانات الدخول غير صحيحة', true);
+  }
+  btn.disabled = false; btn.textContent = 'دخول';
+}
+async function doLogout(){
+  const { signOut } = window._fb();
+  await signOut(window._auth);
+  closeModal('adminOverlay');
+  showToast('تم تسجيل الخروج');
+}
+
+/* ---------------- رفع عمل جديد ---------------- */
+function onFileSelect(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    pendingFile = { name:file.name, content:reader.result, size:file.size };
+    const drop = document.getElementById('fileDrop');
+    drop.textContent = `✅ ${file.name} (${(file.size/1024).toFixed(1)} كيلوبايت)`;
+    drop.classList.add('has-file');
+  };
+  reader.readAsText(file);
+}
+
+const MAX_HTML_SIZE = 900 * 1024; // هامش أمان تحت حد الميغابايت لـ Firestore
+
+async function uploadWork(){
+  if(!window._currentUser){ showToast('يجب تسجيل الدخول أولًا', true); return; }
+  const title = document.getElementById('fTitle').value.trim();
+  const genre = document.getElementById('fGenre').value;
+  const desc  = document.getElementById('fDesc').value.trim();
+
+  if(!title){ showToast('أدخل عنوان العمل', true); return; }
+  if(!pendingFile){ showToast('اختر ملف HTML أولًا', true); return; }
+  if(pendingFile.size > MAX_HTML_SIZE){
+    showToast('الملف كبير جدًا (الحد الأقصى ~900 كيلوبايت)', true);
+    return;
+  }
+
+  const btn = document.getElementById('uploadBtn');
+  btn.disabled = true; btn.textContent = 'جاري النشر...';
+
+  try{
+    const { collection, addDoc, serverTimestamp } = window._fb();
+    await addDoc(collection(window._db, 'works'), {
+      title, genre, description:desc,
+      html: pendingFile.content,
+      size: pendingFile.size,
+      createdAt: serverTimestamp()
+    });
+
+    showToast('تم نشر العمل بنجاح ✨');
+    clearForm();
+    await loadWorks();
+    renderAdminList();
+  }catch(err){
+    console.error(err);
+    showToast('حدث خطأ أثناء الرفع', true);
+  }
+  btn.disabled = false; btn.textContent = 'نشر العمل';
+}
+
+function clearForm(){
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fGenre').value = 'game';
+  document.getElementById('fFile').value = '';
+  pendingFile = null;
+  const drop = document.getElementById('fileDrop');
+  drop.textContent = '📄 اضغط لاختيار ملف HTML';
+  drop.classList.remove('has-file');
+}
+
+/* ---------------- إدارة القائمة (حذف) ---------------- */
+function renderAdminList(){
+  const list = document.getElementById('adminList');
+  if(!works.length){ list.innerHTML = '<p style="color:var(--muted);font-size:.85rem">لا توجد أعمال منشورة بعد.</p>'; return; }
+  list.innerHTML = works.map(w => `
+    <div class="admin-row">
+      <div class="info">
+        <b>${escapeHtml(w.title)}</b>
+        <span>${GENRE_LABELS[w.genre]||'أخرى'} · ${w.size ? (w.size/1024).toFixed(1)+' كيلوبايت' : ''}</span>
+      </div>
+      <button class="del-btn" onclick="deleteWork('${w.id}')">حذف</button>
+    </div>
+  `).join('');
+}
+
+async function deleteWork(id){
+  if(!confirm('هل تريد حذف هذا العمل نهائيًا؟')) return;
+  try{
+    const { doc, deleteDoc } = window._fb();
+    await deleteDoc(doc(window._db, 'works', id));
+    showToast('تم الحذف');
+    await loadWorks();
+    renderAdminList();
+  }catch(err){
+    showToast('تعذّر الحذف', true);
+  }
+}
+
+// إغلاق المودال عند الضغط خارج المحتوى
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click', (e)=>{ if(e.target===ov) ov.classList.remove('show'); });
+});
+</script>
+</body>
+</html>
