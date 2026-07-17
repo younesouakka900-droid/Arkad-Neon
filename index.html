@@ -7,20 +7,20 @@
 <meta name="description" content="أركيد نيون: معرض مصغّر لأعمال HTML تفاعلية — ألعاب، تطبيقات إسلامية، أدوات وتجارب. تفتح وتشتغل بضغطة واحدة من متصفحك مباشرة بدون تحميل أو تثبيت.">
 <meta name="keywords" content="تطبيقات إسلامية, رفيق الصلاة, أذكار المسحبة, القرآن الكريم, أحاديث نبوية, ألعاب HTML, تطبيقات تفاعلية عربية">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://YOUR-DOMAIN-HERE.vercel.app/">
+<link rel="canonical" href="https://arkad-neon.vercel.app/">
 <meta name="author" content="Mangaverse">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="أركيد نيون | معرض أعمال تفاعلية بملف HTML واحد">
 <meta property="og:description" content="عوالم مبنية بملف واحد تُفتح بضغطة واحدة: ألعاب، تطبيقات إسلامية، أدوات وتجارب تفاعلية.">
-<meta property="og:url" content="https://YOUR-DOMAIN-HERE.vercel.app/">
-<meta property="og:image" content="https://YOUR-DOMAIN-HERE.vercel.app/preview.jpg">
+<meta property="og:url" content="https://arkad-neon.vercel.app/">
+<meta property="og:image" content="https://arkad-neon.vercel.app/preview.jpg">
 <meta property="og:locale" content="ar_AR">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="أركيد نيون | معرض أعمال تفاعلية">
 <meta name="twitter:description" content="عوالم مبنية بملف واحد تُفتح بضغطة واحدة في متصفحك.">
-<meta name="twitter:image" content="https://YOUR-DOMAIN-HERE.vercel.app/preview.jpg">
+<meta name="twitter:image" content="https://arkad-neon.vercel.app/preview.jpg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
   "@type": "WebSite",
   "name": "أركيد نيون",
   "alternateName": "Arcade Neon",
-  "url": "https://YOUR-DOMAIN-HERE.vercel.app/",
+  "url": "https://arkad-neon.vercel.app/",
   "description": "معرض مصغّر لأعمال HTML تفاعلية تُفتح بضغطة واحدة من المتصفح.",
   "inLanguage": "ar"
 }
@@ -138,6 +138,12 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
   background:var(--surface);color:var(--text);font-family:'Tajawal';font-size:.87rem;cursor:pointer;
 }
 .sort-box select:focus{outline:none;border-color:var(--cyan);}
+
+/* ---------- محتوى ثابت للفهرسة (مخفي بصريًا) ---------- */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
 
 /* ---------- الفلاتر ---------- */
 .filters{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:40px 0 30px;}
@@ -358,6 +364,25 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
     <button class="chip" data-genre="other" onclick="setFilter('other',this)">✨ أخرى</button>
   </div>
 
+  <div class="sr-only" aria-hidden="false">
+    <h2>الأعمال التفاعلية المتوفرة في أركيد نيون</h2>
+    <article>
+      <h3>رفيق الصلاة { أذان }</h3>
+      <p>تطبيق إسلامي: رفيق الصلاة مواقيت الصلاة حسب موقعك تلقائيًا، بوصلة قبلة تفاعلية، تقويم هجري.</p>
+    </article>
+    <article>
+      <h3>أحاديث نبوية شريفة</h3>
+      <p>تطبيق إسلامي: الأحاديث النبوية متصفح أحاديث مبوّب حسب الكتب والأبواب، مع درجة الحديث.</p>
+    </article>
+    <article>
+      <h3>الأذكار والمسبحة</h3>
+      <p>تطبيق إسلامي: الأذكار والمسبحة أذكار الصباح والمساء مصنّفة، عداد تسبيح تفاعلي مع اهتزاز وتنغيم.</p>
+    </article>
+    <article>
+      <h3>القرآن الكريم</h3>
+      <p>تطبيق إسلامي: القرآن الكريم مصحف إلكتروني كامل مع تلاوة صوتية، إشارة مرجعية لآخر قراءة، بحث.</p>
+    </article>
+  </div>
   <div class="gallery" id="galleryGrid">
     <div class="skeleton-card" id="loadSpinner"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
     <div class="skeleton-card"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
