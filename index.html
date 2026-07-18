@@ -540,11 +540,11 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
       <textarea id="fDesc" placeholder="جملة أو جملتين عن العمل..."></textarea>
     </div>
     <div class="field">
-      <label>ملف index.html</label>
+      <label>ملف العمل (HTML / XML / AIA)</label>
       <div class="file-drop" id="fileDrop" onclick="document.getElementById('fFile').click()">
-        📄 اضغط لاختيار ملف HTML
+        📄 اضغط لاختيار ملف — HTML أو XML أو AIA
       </div>
-      <input type="file" id="fFile" accept=".html,text/html" style="display:none" onchange="onFileSelect(event)">
+      <input type="file" id="fFile" accept=".html,.htm,.xml,.aia" style="display:none" onchange="onFileSelect(event)">
     </div>
     <div class="field">
       <label>صورة مصغّرة (اختياري)</label>
@@ -739,6 +739,7 @@ function renderGallery(){
         <div class="card-body">
           <div class="card-top-row">
             <span class="card-tag" style="background:rgba(0,240,255,.12);color:var(--cyan)">${GENRE_LABELS[w.genre]||'أخرى'}</span>
+            ${w.ext && w.ext !== 'html' && w.ext !== 'htm' ? `<span class="card-tag" style="background:rgba(255,180,0,.15);color:#ffb400">.${w.ext.toUpperCase()}</span>` : ''}
             ${isNew ? `<span class="new-badge">جديد</span>` : ''}
           </div>
           <div class="card-title">${escapeHtml(w.title)}</div>
@@ -748,9 +749,11 @@ function renderGallery(){
             ${sizeKb ? `<span>💾 ${sizeKb} ك.ب</span>` : ''}
           </div>
           <div class="card-actions">
-            <button class="btn btn-play" onclick="playWork('${w.id}')">▶ تشغيل</button>
+            ${w.isBinary
+              ? `<button class="btn btn-play" onclick="downloadWork('${w.id}')">⬇ تنزيل الملف</button>`
+              : `<button class="btn btn-play" onclick="playWork('${w.id}')">▶ تشغيل</button>`}
             <button class="btn btn-dl" onclick="shareWork('${w.id}')" title="مشاركة">🔗</button>
-            <button class="btn btn-dl" onclick="copyWorkCode('${w.id}')" title="نسخ الكود">⧉</button>
+            ${w.isBinary ? '' : `<button class="btn btn-dl" onclick="copyWorkCode('${w.id}')" title="نسخ الكود">⧉</button>`}
             <button class="btn btn-dl" onclick="downloadWork('${w.id}')" title="تحميل">⬇</button>
           </div>
         </div>
@@ -824,8 +827,14 @@ function setFilter(genre, btn){
 async function playWork(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
+  const ext = (w.ext || 'html').toLowerCase();
+  if(w.isBinary){
+    showToast(`ملفات .${ext} لا يمكن تشغيلها داخل المتصفح — استخدم زر التحميل ⬇`, true);
+    return;
+  }
   try{
-    const blob = new Blob([w.html], {type:'text/html'});
+    const mime = ext === 'xml' ? 'text/xml' : 'text/html';
+    const blob = new Blob([w.html], {type:mime});
     const url = URL.createObjectURL(blob);
     document.getElementById('playTitle').textContent = w.title;
     document.getElementById('playFrame').src = url;
@@ -859,6 +868,10 @@ function toggleFrameFullscreen(){
 async function copyWorkCode(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
+  if(w.isBinary){
+    showToast('لا يمكن نسخ كود ملف ثنائي مثل AIA — استخدم زر التحميل ⬇', true);
+    return;
+  }
   try{
     if(navigator.clipboard && window.isSecureContext){
       await navigator.clipboard.writeText(w.html);
@@ -882,12 +895,21 @@ async function copyWorkCode(id){
 async function downloadWork(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
+  const ext = (w.ext || 'html').toLowerCase();
   try{
-    const blob = new Blob([w.html], {type:'text/html'});
+    let blob;
+    if(w.isBinary){
+      // المحتوى مخزّن كـ Data URL (Base64) — نحوّله رجوعًا لملف ثنائي حقيقي
+      const res = await fetch(w.html);
+      blob = await res.blob();
+    }else{
+      const mime = ext === 'xml' ? 'text/xml' : (ext === 'txt' ? 'text/plain' : 'text/html');
+      blob = new Blob([w.html], {type:mime});
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.html';
+    a.download = (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.' + ext;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -936,17 +958,35 @@ async function doLogout(){
 }
 
 /* ---------------- رفع عمل جديد ---------------- */
+// الصيغ المدعومة للرفع. لإضافة صيغة جديدة مستقبلًا: أضفها هنا،
+// وإن كانت صيغة ثنائية (غير نصية مثل ملفات مضغوطة) أضفها أيضًا في BINARY_EXTS.
+const ALLOWED_EXTS = ['html','htm','xml','aia'];
+const BINARY_EXTS  = ['aia']; // aia هو أرشيف مضغوط (مشروع App Inventor) وليس نصًا عاديًا
+
+function getExt(filename){
+  const m = /\.([a-z0-9]+)$/i.exec(filename || '');
+  return m ? m[1].toLowerCase() : '';
+}
+
 function onFileSelect(e){
   const file = e.target.files[0];
   if(!file) return;
+  const ext = getExt(file.name);
+  if(!ALLOWED_EXTS.includes(ext)){
+    showToast(`صيغة غير مدعومة. المسموح به: ${ALLOWED_EXTS.join(', ')}`, true);
+    e.target.value = '';
+    return;
+  }
+  const isBinary = BINARY_EXTS.includes(ext);
   const reader = new FileReader();
   reader.onload = () => {
-    pendingFile = { name:file.name, content:reader.result, size:file.size };
+    pendingFile = { name:file.name, content:reader.result, size:file.size, ext, isBinary };
     const drop = document.getElementById('fileDrop');
     drop.textContent = `✅ ${file.name} (${(file.size/1024).toFixed(1)} كيلوبايت)`;
     drop.classList.add('has-file');
   };
-  reader.readAsText(file);
+  if(isBinary) reader.readAsDataURL(file); // نص Base64 يحافظ على المحتوى الثنائي
+  else reader.readAsText(file);
 }
 
 const MAX_THUMB_SIZE = 350 * 1024; // حد أقصى للصورة قبل الترميز
@@ -981,10 +1021,12 @@ async function uploadWork(){
   // بوضع التعديل: ملف الـ HTML اختياري (نحتفظ بالقديم إن لم يُستبدل)
   if(!editingId && !pendingFile){ showToast('اختر ملف HTML أولًا', true); return; }
 
-  const htmlSize  = pendingFile ? pendingFile.size : (editingOriginal?.size || 0);
+  // نستخدم طول المحتوى المُخزَّن فعليًا (بعد ترميز Base64 للملفات الثنائية مثل aia)
+  // لأنه هو ما يُكتب فعلًا داخل مستند Firestore، وليس حجم الملف الأصلي.
+  const htmlSize  = pendingFile ? pendingFile.content.length : (editingOriginal?.size || 0);
   const thumbSize = pendingThumb ? pendingThumb.dataUrl.length : 0;
   if(htmlSize + thumbSize > MAX_HTML_SIZE){
-    showToast('حجم الملف + الصورة كبير جدًا (الحد الإجمالي ~900 كيلوبايت)', true);
+    showToast('حجم الملف + الصورة كبير جدًا بعد الترميز (الحد الإجمالي ~900 كيلوبايت). ملفات AIA الثنائية تكبر ~33% عند الرفع.', true);
     return;
   }
 
@@ -997,7 +1039,12 @@ async function uploadWork(){
     if(editingId){
       // تعديل عمل موجود — نحدّث فقط الحقول اللي تغيّرت
       const updates = { title, genre, description:desc };
-      if(pendingFile){ updates.html = pendingFile.content; updates.size = pendingFile.size; }
+      if(pendingFile){
+        updates.html = pendingFile.content;
+        updates.size = pendingFile.size;
+        updates.ext = pendingFile.ext;
+        updates.isBinary = pendingFile.isBinary;
+      }
       if(pendingThumb){ updates.thumbnail = pendingThumb.dataUrl; }
       await updateDoc(doc(window._db, 'works', editingId), updates);
       showToast('تم حفظ التعديلات ✨');
@@ -1006,6 +1053,8 @@ async function uploadWork(){
       await addDoc(collection(window._db, 'works'), {
         title, genre, description:desc,
         html: pendingFile.content,
+        ext: pendingFile.ext,
+        isBinary: pendingFile.isBinary,
         thumbnail: pendingThumb ? pendingThumb.dataUrl : null,
         size: pendingFile.size,
         createdAt: serverTimestamp()
