@@ -406,24 +406,9 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
     <button class="chip" data-genre="other" onclick="setFilter('other',this)">✨ أخرى</button>
   </div>
 
-  <div class="sr-only" aria-hidden="false">
+  <div class="sr-only" id="seoContent" aria-hidden="false">
     <h2>الأعمال التفاعلية المتوفرة في أركيد نيون</h2>
-    <article>
-      <h3>رفيق الصلاة { أذان }</h3>
-      <p>تطبيق إسلامي: رفيق الصلاة مواقيت الصلاة حسب موقعك تلقائيًا، بوصلة قبلة تفاعلية، تقويم هجري.</p>
-    </article>
-    <article>
-      <h3>أحاديث نبوية شريفة</h3>
-      <p>تطبيق إسلامي: الأحاديث النبوية متصفح أحاديث مبوّب حسب الكتب والأبواب، مع درجة الحديث.</p>
-    </article>
-    <article>
-      <h3>الأذكار والمسبحة</h3>
-      <p>تطبيق إسلامي: الأذكار والمسبحة أذكار الصباح والمساء مصنّفة، عداد تسبيح تفاعلي مع اهتزاز وتنغيم.</p>
-    </article>
-    <article>
-      <h3>القرآن الكريم</h3>
-      <p>تطبيق إسلامي: القرآن الكريم مصحف إلكتروني كامل مع تلاوة صوتية، إشارة مرجعية لآخر قراءة، بحث.</p>
-    </article>
+    <!-- يتم تعبئة هذا القسم تلقائيًا من نفس بيانات الأعمال بعد تحميلها -->
   </div>
   <div class="gallery" id="galleryGrid">
     <div class="skeleton-card" id="loadSpinner"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
@@ -689,6 +674,7 @@ async function loadWorks(){
   }
   if(spinner) spinner.remove();
   updateStats();
+  updateSeoContent();
   renderGallery();
   openSharedWorkFromUrl();
 }
@@ -702,6 +688,19 @@ function openSharedWorkFromUrl(){
 function updateStats(){
   document.getElementById('statTotal').textContent = works.length;
   document.getElementById('statGenres').textContent = new Set(works.map(w=>w.genre)).size;
+}
+
+/* يبني نسخة نصية من الأعمال داخل القسم المخفي، تتحدّث تلقائيًا مع كل عمل جديد */
+function updateSeoContent(){
+  const box = document.getElementById('seoContent');
+  if(!box) return;
+  const articles = works.map(w => `
+    <article>
+      <h3>${escapeHtml(w.title)}</h3>
+      <p>${escapeHtml(GENRE_LABELS[w.genre] || 'أخرى')}: ${escapeHtml(w.description || '')}</p>
+    </article>
+  `).join('');
+  box.innerHTML = `<h2>الأعمال التفاعلية المتوفرة في أركيد نيون</h2>${articles}`;
 }
 
 /* ---------------- عرض المعرض ---------------- */
