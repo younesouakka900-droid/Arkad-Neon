@@ -348,6 +348,20 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
 .link-btn{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;text-decoration:underline;margin-top:10px;}
 
 /* ---------- لوحة التحكم ---------- */
+.manage-btn{
+  width:100%;padding:12px;border-radius:10px;cursor:pointer;margin-top:10px;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  font-family:'Tajawal';font-weight:700;font-size:.88rem;
+}
+.manage-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.manage-panel{width:100%;max-width:600px;max-height:85vh;overflow-y:auto;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;}
+.manage-panel h2{font-family:'Cairo';margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.manage-search{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text);font-family:'Tajawal';font-size:.88rem;margin-bottom:16px;}
+.manage-search:focus{outline:none;border-color:var(--cyan);}
+.manage-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:30px 0;}
+
 .admin-panel{width:100%;max-width:640px;max-height:85vh;overflow-y:auto;background:var(--surface);
   border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
 .admin-panel h2{font-family:'Cairo';margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
@@ -524,6 +538,7 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
       <button onclick="copyEmail()">نسخ</button>
     </div>
     <a class="about-btn" href="mailto:younesouakka4@gmail.com?subject=تواصل من أركيد نيون">✉ مراسلة عبر البريد</a>
+    <a class="about-btn" href="profile.html" target="_blank" rel="noopener" style="margin-top:8px;background:transparent;border:1px solid var(--border);color:var(--text);">🌐 صفحتي الشخصية الكاملة</a>
   </div>
 </div>
 
@@ -622,8 +637,18 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
     </div>
     <button class="submit-btn" id="uploadBtn" onclick="uploadWork()">نشر العمل</button>
     <button class="link-btn" id="cancelEditBtn" onclick="clearForm()" style="display:none">إلغاء التعديل والعودة لنشر عمل جديد</button>
+    <button class="manage-btn" onclick="openManageWorks()">📋 إدارة الأعمال المنشورة (<span id="manageCount">0</span>)</button>
+  </div>
+</div>
 
-    <div class="admin-list" id="adminList"></div>
+<!-- صفحة إدارة الأعمال (تعديل / حذف) -->
+<div class="modal-overlay" id="manageOverlay">
+  <div class="manage-panel">
+    <h2>إدارة الأعمال المنشورة
+      <button class="icon-btn" onclick="closeModal('manageOverlay')" title="إغلاق">✕</button>
+    </h2>
+    <input type="text" class="manage-search" id="manageSearch" placeholder="ابحث عن عمل بالاسم..." oninput="renderAdminList()">
+    <div id="adminList"></div>
   </div>
 </div>
 
@@ -770,6 +795,8 @@ function openSharedWorkFromUrl(){
 function updateStats(){
   countUpTo('statTotal', works.length);
   countUpTo('statGenres', new Set(works.map(w=>w.genre)).size);
+  const mc = document.getElementById('manageCount');
+  if(mc) mc.textContent = works.length;
 }
 function countUpTo(id, target){
   const el = document.getElementById(id);
@@ -1227,6 +1254,8 @@ function editWork(id){
   document.getElementById('uploadBtn').textContent = 'حفظ التعديلات';
   document.getElementById('cancelEditBtn').style.display = 'block';
 
+  closeModal('manageOverlay');
+  document.getElementById('adminOverlay').classList.add('show');
   document.querySelector('.admin-panel').scrollTo({top:0, behavior:'smooth'});
   showToast(`تعديل: ${w.title}`);
 }
@@ -1254,10 +1283,19 @@ function clearForm(){
 
 
 /* ---------------- إدارة القائمة (تعديل / حذف) ---------------- */
+function openManageWorks(){
+  closeModal('adminOverlay');
+  document.getElementById('manageOverlay').classList.add('show');
+  document.getElementById('manageSearch').value = '';
+  renderAdminList();
+}
 function renderAdminList(){
   const list = document.getElementById('adminList');
-  if(!works.length){ list.innerHTML = '<p style="color:var(--muted);font-size:.85rem">لا توجد أعمال منشورة بعد.</p>'; return; }
-  list.innerHTML = works.map(w => `
+  const q = (document.getElementById('manageSearch')?.value || '').trim().toLowerCase();
+  const filtered = q ? works.filter(w => (w.title||'').toLowerCase().includes(q)) : works;
+  if(!works.length){ list.innerHTML = '<p class="manage-empty">لا توجد أعمال منشورة بعد.</p>'; return; }
+  if(!filtered.length){ list.innerHTML = '<p class="manage-empty">لا توجد نتائج مطابقة للبحث.</p>'; return; }
+  list.innerHTML = filtered.map(w => `
     <div class="admin-row">
       <div class="info">
         <b>${escapeHtml(w.title)}</b>
