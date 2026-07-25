@@ -304,35 +304,9 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
   font-size:.88rem;line-height:1.8;color:var(--text);flex:1;}
 .readme-foot{padding:14px 20px;border-top:1px solid var(--border);}
 
-/* ---------- مودال "عني / تواصل" ---------- */
-.about-modal{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:32px 28px;position:relative;text-align:center;}
-.about-avatar{
-  width:72px;height:72px;border-radius:50%;margin:0 auto 16px;
-  background:linear-gradient(135deg,var(--cyan),var(--violet),var(--magenta));
-  display:flex;align-items:center;justify-content:center;font-family:'Cairo';font-weight:900;
-  font-size:1.6rem;color:#050110;
-}
-.about-modal h2{font-family:'Cairo';font-size:1.25rem;margin-bottom:4px;}
-.about-modal .role{color:var(--muted);font-size:.85rem;margin-bottom:22px;}
-.contact-row{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
-  padding:12px 16px;margin-bottom:10px;text-align:right;
-}
-.contact-row span{font-size:.88rem;color:var(--text);word-break:break-all;}
-.contact-row button{
-  flex:0 0 auto;background:var(--surface2);border:1px solid var(--border);color:var(--cyan);
-  border-radius:8px;padding:7px 12px;font-family:'Tajawal';font-size:.78rem;cursor:pointer;
-}
-.contact-row button:hover{border-color:var(--cyan);}
-.about-btn{
-  display:block;width:100%;padding:12px;border:none;border-radius:10px;cursor:pointer;text-decoration:none;
-  background:linear-gradient(90deg,var(--cyan),var(--violet));color:#050110;
-  font-weight:800;font-family:'Cairo';font-size:.92rem;margin-top:14px;
-}
+/* ---------- روابط الفوتر ---------- */
 .footer-links{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:10px;flex-wrap:wrap;}
-.footer-links button{
+.footer-links button, .footer-links a{
   background:none;border:none;color:var(--cyan);font-family:'Tajawal';font-size:.85rem;cursor:pointer;
   text-decoration:underline;padding:2px 4px;
 }
@@ -505,25 +479,9 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
 <footer>
   أركيد نيون — معرض تفاعلي مبني بملف واحد ⚡
   <div class="footer-links">
-    <button onclick="openAbout()">عني / تواصل</button>
+    <a href="profile.html" target="_blank" rel="noopener">عني / تواصل</a>
   </div>
 </footer>
-
-<!-- مودال التشغيل -->
-<div class="modal-overlay" id="aboutOverlay">
-  <div class="about-modal">
-    <button class="icon-btn" onclick="closeAbout()" style="position:absolute;top:10px;left:10px;">✕</button>
-    <div class="about-avatar">Y</div>
-    <h2>Younes Ouakka</h2>
-    <div class="role">مطوّر منصة أركيد نيون</div>
-    <div class="contact-row">
-      <span>younesouakka4@gmail.com</span>
-      <button onclick="copyEmail()">نسخ</button>
-    </div>
-    <a class="about-btn" href="mailto:younesouakka4@gmail.com?subject=تواصل من أركيد نيون">✉ مراسلة عبر البريد</a>
-    <a class="about-btn" href="profile.html" target="_blank" rel="noopener" style="margin-top:8px;background:transparent;border:1px solid var(--border);color:var(--text);">🌐 صفحتي الشخصية الكاملة</a>
-  </div>
-</div>
 
 <div class="modal-overlay" id="playOverlay">
   <div class="play-modal">
@@ -719,35 +677,6 @@ function showToast(msg, isErr=false){
 }
 
 function scrollToTop(){ window.scrollTo({top:0, behavior:'smooth'}); }
-
-/* ---------------- عني / تواصل ---------------- */
-function openAbout(){
-  document.getElementById('aboutOverlay').classList.add('show');
-}
-function closeAbout(){
-  document.getElementById('aboutOverlay').classList.remove('show');
-}
-async function copyEmail(){
-  const email = 'younesouakka4@gmail.com';
-  try{
-    if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(email);
-    }else{
-      const ta = document.createElement('textarea');
-      ta.value = email;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.focus(); ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    }
-    showToast('تم نسخ الإيميل 📋');
-  }catch(err){
-    console.error(err);
-    showToast('تعذّر نسخ الإيميل', true);
-  }
-}
 
 /* ---------------- تحميل الأعمال ---------------- */
 async function loadWorks(){
