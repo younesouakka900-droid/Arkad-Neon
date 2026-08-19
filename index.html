@@ -1079,28 +1079,38 @@ async function copyWorkCode(id){
   }
 }
 
+// يحوّل نص عادي إلى Data URL بصيغة base64 (متوافق مع WebView تطبيقات AppCreator24)
+function textToDataUrl(text, mime){
+  const base64 = btoa(unescape(encodeURIComponent(text)));
+  return `data:${mime};charset=utf-8;base64,` + base64;
+}
+
+// ينفّذ التنزيل عبر رابط <a download> بصيغة data: بدل blob:
+// (روابط blob: لا يدعمها Android WebView الأصلي المستخدم داخل تطبيقات AppCreator24)
+function triggerDataUrlDownload(dataUrl, filename){
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 async function downloadWork(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
   const ext = (w.ext || 'html').toLowerCase();
+  const filename = (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.' + ext;
   try{
-    let blob;
+    let dataUrl;
     if(w.isBinary){
-      // المحتوى مخزّن كـ Data URL (Base64) — نحوّله رجوعًا لملف ثنائي حقيقي
-      const res = await fetch(w.html);
-      blob = await res.blob();
+      // المحتوى مخزّن أصلًا كـ Data URL (Base64) — يُستخدم مباشرة
+      dataUrl = w.html;
     }else{
       const mime = ext === 'xml' ? 'text/xml' : (ext === 'txt' ? 'text/plain' : 'text/html');
-      blob = new Blob([w.html], {type:mime});
+      dataUrl = textToDataUrl(w.html, mime);
     }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.' + ext;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    triggerDataUrlDownload(dataUrl, filename);
   }catch(err){
     console.error(err);
     showToast('تعذّر تحميل الملف', true);
@@ -1120,15 +1130,9 @@ function downloadReadme(){
   const w = works.find(x=>x.id===currentReadmeId);
   if(!w) return;
   const text = w.readme && w.readme.trim() ? w.readme : 'لا توجد تعليمات مضافة لهذا العمل بعد.';
-  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'README-' + (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.txt';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  const dataUrl = textToDataUrl(text, 'text/plain');
+  const filename = 'README-' + (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.txt';
+  triggerDataUrlDownload(dataUrl, filename);
 }
 function toggleDesc(el){
   el.classList.toggle('expanded');
