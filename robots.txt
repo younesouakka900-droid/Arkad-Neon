@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://arkad-neon.vercel.app/sitemap.xml
+Sitemap: https://arkadneon.com/sitemap.xml
