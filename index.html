@@ -707,6 +707,7 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
   أركيد نيون — معرض تفاعلي مبني بملف واحد ⚡
   <div class="footer-links">
     <a href="profile.html" target="_blank" rel="noopener">عني / تواصل</a>
+    <a href="policies.html" target="_blank" rel="noopener">الشروط والخصوصية</a>
   </div>
 </footer>
 
@@ -948,6 +949,9 @@ function renderPremiumCards(){
               <button class="unlock-confirm" onclick="verifyPremiumCode('${p.id}')">تأكيد</button>
             </div>
             <div class="unlock-msg" id="unlockMsg-${p.id}"></div>
+          </div>
+          <div style="text-align:center;margin-top:10px;">
+            <a href="policies.html#refund" target="_blank" rel="noopener" style="color:var(--muted);font-size:.72rem;text-decoration:underline;">🛡 سياسة الاسترجاع والضمان</a>
           </div>
 
           <button class="btn-final-dl" id="finalDl-${p.id}" style="display:none" onclick="downloadPremiumFile('${p.id}')">
