@@ -476,9 +476,13 @@ body.is-admin .card-edit-fab{display:flex;}
 .detail-head b{font-family:'Cairo';font-size:1.05rem;}
 .detail-scroll{overflow-y:auto;}
 .detail-body{display:flex;flex-direction:column;}
-.detail-cover{width:100%;height:210px;flex-shrink:0;position:relative;overflow:hidden;
+.detail-cover{width:100%;height:220px;flex-shrink:0;position:relative;overflow:hidden;
   background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:3.4rem;}
-.detail-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+.detail-cover-bg{position:absolute;inset:0;background-size:cover;background-position:center;
+  filter:blur(24px) brightness(.45) saturate(1.2);transform:scale(1.15);}
+.detail-cover-img{position:relative;z-index:1;max-width:100%;max-height:100%;width:auto;height:auto;
+  object-fit:contain;display:block;margin:0 auto;}
+@media(min-width:640px){ .detail-cover{height:300px;} }
 .detail-info{padding:20px;min-width:0;}
 .detail-title{font-family:'Cairo';font-weight:900;font-size:1.35rem;margin-bottom:6px;}
 .detail-meta-line{color:var(--muted);font-size:.82rem;margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
@@ -1324,6 +1328,9 @@ async function playWork(id){
 }
 
 async function trackView(w){
+  // نحتسب مشاهدة واحدة فقط لكل عمل في الجلسة الحالية للمتصفح، حتى لو ضغط الزائر "تشغيل" عدة مرات
+  if(hasCountedView(w.id)) return;
+  markViewCounted(w.id);
   w.viewCount = (w.viewCount || 0) + 1;
   renderGallery();
   if(!fbReady) return;
@@ -1333,6 +1340,22 @@ async function trackView(w){
   }catch(err){
     console.error('تعذّر تحديث عداد المشاهدات', err);
   }
+}
+
+function hasCountedView(id){
+  try{
+    const seen = JSON.parse(sessionStorage.getItem('arkadViewedWorks') || '[]');
+    return seen.includes(id);
+  }catch(err){ return false; }
+}
+function markViewCounted(id){
+  try{
+    const seen = JSON.parse(sessionStorage.getItem('arkadViewedWorks') || '[]');
+    if(!seen.includes(id)){
+      seen.push(id);
+      sessionStorage.setItem('arkadViewedWorks', JSON.stringify(seen));
+    }
+  }catch(err){}
 }
 function closePlay(){
   document.getElementById('playOverlay').classList.remove('show');
@@ -1451,7 +1474,7 @@ async function openWorkDetail(id){
   document.getElementById('replyContext').style.display = 'none';
 
   document.getElementById('detailCover').innerHTML = w.thumbnail
-    ? `<img src="${w.thumbnail}" alt="${escapeHtml(w.title)}">`
+    ? `<div class="detail-cover-bg" style="background-image:url('${w.thumbnail}')"></div><img class="detail-cover-img" src="${w.thumbnail}" alt="${escapeHtml(w.title)}">`
     : `<span>${GENRE_ICON[w.genre]||'✨'}</span>`;
   document.getElementById('detailCover').style.background = w.thumbnail ? '' : (GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other);
 
