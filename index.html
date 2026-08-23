@@ -285,6 +285,20 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
   font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:99px;
   background:linear-gradient(90deg,var(--lime),#8fe000);color:#0a1a00;letter-spacing:.3px;
 }
+/* زر التعديل السريع (الترس) — يظهر فقط عند تسجيل دخول الأدمن */
+.card-edit-fab{
+  display:none;position:absolute;top:10px;right:10px;z-index:5;
+  width:34px;height:34px;border-radius:10px;
+  border:1px solid rgba(0,240,255,.4);
+  background:rgba(10,6,26,.75);backdrop-filter:blur(6px);
+  color:var(--cyan);font-size:1.05rem;line-height:1;cursor:pointer;
+  align-items:center;justify-content:center;transition:.25s;
+}
+body.is-admin .card-edit-fab{display:flex;}
+.card-edit-fab:hover{
+  border-color:var(--cyan);background:rgba(0,240,255,.18);
+  box-shadow:0 0 16px rgba(0,240,255,.5);transform:rotate(75deg);
+}
 
 .card-body{padding:16px 18px 18px;}
 .card-tag{
@@ -454,6 +468,65 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
 .readme-body{padding:18px 20px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;
   font-size:.88rem;line-height:1.8;color:var(--text);flex:1;}
 .readme-foot{padding:14px 20px;border-top:1px solid var(--border);}
+
+/* ---------- مودال تفاصيل العمل (كارد بأسلوب المعرض الكبير) ---------- */
+.detail-modal{width:100%;max-width:820px;max-height:88vh;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden;}
+.detail-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.detail-head b{font-family:'Cairo';font-size:1.05rem;}
+.detail-scroll{overflow-y:auto;}
+.detail-body{padding:20px;display:flex;gap:22px;}
+.detail-cover{width:170px;aspect-ratio:4/3;border-radius:14px;overflow:hidden;flex-shrink:0;
+  background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:3rem;}
+.detail-cover img{width:100%;height:100%;object-fit:cover;}
+.detail-info{flex:1;min-width:0;}
+.detail-title{font-family:'Cairo';font-weight:900;font-size:1.35rem;margin-bottom:6px;}
+.detail-meta-line{color:var(--muted);font-size:.82rem;margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.detail-desc-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;
+  padding:14px;color:var(--text);font-size:.87rem;line-height:1.8;margin-bottom:16px;max-height:140px;overflow-y:auto;white-space:pre-wrap;}
+.detail-stars-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.detail-star{font-size:1.4rem;cursor:pointer;transition:transform .15s;user-select:none;}
+.detail-star:hover{transform:scale(1.2);}
+.detail-star.active{filter:drop-shadow(0 0 5px var(--cyan));}
+.detail-avg-lbl{color:var(--muted);font-size:.8rem;}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.detail-actions .btn{flex:0 0 auto;padding:10px 18px;}
+.detail-sep{border:none;border-top:1px solid var(--border);margin:0 20px;flex-shrink:0;}
+.detail-comments-section{padding:18px 20px 20px;}
+.detail-comments-section h4{font-family:'Cairo';font-size:.95rem;margin-bottom:12px;}
+.comments-box{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;max-height:280px;overflow-y:auto;}
+.comment-item{display:flex;gap:10px;align-items:flex-start;padding:8px;border-radius:10px;transition:background .2s;}
+.comment-item:hover{background:rgba(255,255,255,.03);}
+.comment-item.reply{margin-right:34px;border-right:2px solid rgba(0,240,255,.2);padding-right:12px;}
+.comment-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cyan),var(--violet));
+  display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#050110;}
+.comment-body{flex:1;min-width:0;}
+.comment-name{font-size:.8rem;font-weight:700;color:var(--cyan);margin-bottom:2px;}
+.comment-txt{font-size:.85rem;color:var(--text);line-height:1.6;word-break:break-word;}
+.comment-actions{display:flex;gap:6px;margin-top:4px;align-items:center;flex-wrap:wrap;}
+.comment-action-btn{background:none;border:none;color:var(--muted);font-family:'Tajawal';font-size:.72rem;
+  cursor:pointer;padding:2px 6px;border-radius:6px;transition:.2s;display:inline-flex;align-items:center;gap:3px;}
+.comment-action-btn:hover{background:rgba(255,255,255,.06);color:var(--text);}
+.comment-action-btn.liked{color:var(--magenta);}
+.comment-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:14px 0;}
+.reply-context{display:flex;align-items:center;justify-content:space-between;background:rgba(0,240,255,.08);
+  border:1px solid rgba(0,240,255,.25);border-radius:8px;padding:6px 12px;margin-bottom:8px;font-size:.78rem;color:var(--cyan);}
+.reply-context button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;}
+.comment-name-row{margin-bottom:8px;}
+.comment-name-row input{width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text);font-family:'Tajawal';font-size:.82rem;}
+.comment-row{display:flex;gap:8px;}
+.comment-row input{flex:1;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text);font-family:'Tajawal';font-size:.87rem;}
+.comment-row input:focus, .comment-name-row input:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,240,255,.15);}
+.comment-send{padding:0 20px;border:none;border-radius:10px;cursor:pointer;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));color:#050110;font-weight:800;font-family:'Cairo';font-size:.85rem;}
+.card-rating-chip{color:var(--cyan);}
+@media(max-width:640px){
+  .detail-body{flex-direction:column;}
+  .detail-cover{width:100%;max-width:220px;margin:0 auto;aspect-ratio:16/9;}
+}
 
 /* ---------- روابط الفوتر ---------- */
 .footer-links{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:10px;flex-wrap:wrap;}
@@ -738,6 +811,47 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
   </div>
 </div>
 
+<!-- مودال تفاصيل العمل -->
+<div class="modal-overlay" id="detailOverlay">
+  <div class="detail-modal">
+    <div class="detail-head">
+      <b>📖 تفاصيل العمل</b>
+      <button class="icon-btn" onclick="closeModal('detailOverlay')" title="إغلاق">✕</button>
+    </div>
+    <div class="detail-scroll">
+      <div class="detail-body">
+        <div class="detail-cover" id="detailCover"></div>
+        <div class="detail-info">
+          <div class="detail-title" id="detailTitle"></div>
+          <div class="detail-meta-line" id="detailMetaLine"></div>
+          <div class="detail-desc-box" id="detailDesc"></div>
+          <div class="detail-stars-row">
+            <div id="detailStars"></div>
+            <span class="detail-avg-lbl" id="detailAvg"></span>
+          </div>
+          <div class="detail-actions" id="detailActions"></div>
+        </div>
+      </div>
+      <hr class="detail-sep">
+      <div class="detail-comments-section">
+        <h4>💬 التعليقات</h4>
+        <div class="reply-context" id="replyContext" style="display:none">
+          <span id="replyContextLabel"></span>
+          <button onclick="cancelReply()" title="إلغاء الرد">✕</button>
+        </div>
+        <div class="comments-box" id="detailComments"></div>
+        <div class="comment-name-row">
+          <input id="commentNameInp" type="text" placeholder="اسمك (اختياري)" maxlength="40">
+        </div>
+        <div class="comment-row">
+          <input id="commentTextInp" type="text" placeholder="اكتب تعليقاً..." maxlength="500" onkeydown="if(event.key==='Enter') submitComment()">
+          <button class="comment-send" onclick="submitComment()">إرسال</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- مودال دخول المشرف -->
 <div class="modal-overlay" id="authOverlay">
   <div class="small-modal">
@@ -1009,7 +1123,12 @@ document.addEventListener('DOMContentLoaded', renderPremiumCards);
 document.addEventListener('fbReady', () => { fbReady = true; loadWorks(); });
 document.addEventListener('authChanged', (e) => {
   const user = e.detail;
+  document.body.classList.toggle('is-admin', !!user);
   if (user) { renderAdminList(); }
+  renderGallery();
+  if (currentDetailId && document.getElementById('detailOverlay').classList.contains('show')) {
+    loadDetailComments(currentDetailId);
+  }
 });
 
 function showToast(msg, isErr=false){
@@ -1044,7 +1163,7 @@ async function loadWorks(){
 function openSharedWorkFromUrl(){
   const params = new URLSearchParams(window.location.search);
   const id = params.get('work');
-  if(id && works.some(w => w.id === id)) playWork(id);
+  if(id && works.some(w => w.id === id)) openWorkDetail(id);
 }
 
 function updateStats(){
@@ -1123,7 +1242,7 @@ function renderCard(w){
   const views = w.viewCount || 0;
   const sizeKb = w.size ? (w.size/1024).toFixed(1) : null;
   return `
-    <div class="card">
+    <div class="card" onclick="openWorkDetail('${w.id}')">
       <div class="card-inner">
         <div class="thumb" style="${w.thumbnail ? '' : `background:${GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other}`}">
           ${w.thumbnail
@@ -1131,17 +1250,19 @@ function renderCard(w){
             : `<span>${GENRE_ICON[w.genre]||'✨'}</span>`}
           <span class="thumb-tag">${GENRE_LABELS[w.genre]||'أخرى'}</span>
           ${isNew ? `<span class="thumb-new">جديد</span>` : ''}
+          <button class="card-edit-fab" title="تعديل سريع" onclick="event.stopPropagation(); editWork('${w.id}')">⚙️</button>
         </div>
         <div class="card-body">
           ${w.ext && w.ext !== 'html' && w.ext !== 'htm' ? `<div class="card-top-row"><span class="card-tag" style="background:rgba(255,180,0,.15);color:#ffb400">.${w.ext.toUpperCase()}</span></div>` : ''}
           <div class="card-title">${escapeHtml(w.title)}</div>
-          <div class="card-desc" onclick="toggleDesc(this)">${escapeHtml(w.description||'بدون وصف')}</div>
-          <button class="desc-toggle" onclick="toggleDesc(this.previousElementSibling)">عرض المزيد ⌄</button>
+          <div class="card-desc" onclick="event.stopPropagation(); toggleDesc(this)">${escapeHtml(w.description||'بدون وصف')}</div>
+          <button class="desc-toggle" onclick="event.stopPropagation(); toggleDesc(this.previousElementSibling)">عرض المزيد ⌄</button>
           <div class="card-meta">
             <span>▶ ${views}</span>
             ${sizeKb ? `<span>💾 ${sizeKb} ك.ب</span>` : ''}
+            ${w.rating ? `<span class="card-rating-chip">⭐ ${Number(w.rating).toFixed(1)}</span>` : ''}
           </div>
-          <div class="card-actions">
+          <div class="card-actions" onclick="event.stopPropagation();">
             ${w.isBinary
               ? `<button class="btn btn-play" onclick="downloadWork('${w.id}')">⬇ تنزيل الملف</button>`
               : `<button class="btn btn-play" onclick="playWork('${w.id}')">▶ تشغيل</button>`}
@@ -1342,6 +1463,230 @@ function downloadReadme(){
 }
 function toggleDesc(el){
   el.classList.toggle('expanded');
+}
+
+/* ---------------- تفاصيل العمل: تقييم بالنجوم + تعليقات (بدون تسجيل دخول للزوار) ---------------- */
+function getAnonId(){
+  let id = localStorage.getItem('arkadAnonId');
+  if(!id){
+    id = 'anon_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('arkadAnonId', id);
+  }
+  return id;
+}
+function getAnonName(){ return localStorage.getItem('arkadAnonName') || ''; }
+function setAnonName(n){ if(n) localStorage.setItem('arkadAnonName', n); }
+
+let currentDetailId = null;
+let replyTarget = null; // {id, name}
+
+async function openWorkDetail(id){
+  const w = works.find(x=>x.id===id);
+  if(!w) return;
+  currentDetailId = id;
+  replyTarget = null;
+  document.getElementById('replyContext').style.display = 'none';
+
+  document.getElementById('detailCover').innerHTML = w.thumbnail
+    ? `<img src="${w.thumbnail}" alt="${escapeHtml(w.title)}">`
+    : `<span>${GENRE_ICON[w.genre]||'✨'}</span>`;
+  document.getElementById('detailCover').style.background = w.thumbnail ? '' : (GENRE_GRADIENT[w.genre]||GENRE_GRADIENT.other);
+
+  document.getElementById('detailTitle').textContent = w.title || '';
+  const sizeKb = w.size ? (w.size/1024).toFixed(1)+' ك.ب' : '';
+  document.getElementById('detailMetaLine').innerHTML = `
+    <span>${GENRE_ICON[w.genre]||'✨'} ${GENRE_LABELS[w.genre]||'أخرى'}</span>
+    <span>▶ ${w.viewCount||0} مشاهدة</span>
+    ${sizeKb ? `<span>💾 ${sizeKb}</span>` : ''}
+    ${w.ext && w.ext!=='html' && w.ext!=='htm' ? `<span>.${w.ext.toUpperCase()}</span>` : ''}
+  `;
+  document.getElementById('detailDesc').textContent = w.description && w.description.trim() ? w.description : 'بدون وصف';
+
+  renderDetailStars(w);
+
+  const actions = document.getElementById('detailActions');
+  actions.innerHTML = `
+    ${w.isBinary
+      ? `<button class="btn btn-play" onclick="closeModal('detailOverlay'); downloadWork('${w.id}')">⬇ تنزيل الملف</button>`
+      : `<button class="btn btn-play" onclick="closeModal('detailOverlay'); playWork('${w.id}')">▶ تشغيل / معاينة</button>`}
+    ${w.readme && w.readme.trim() ? `<button class="btn btn-dl" style="flex:0 0 auto;padding:10px 16px" onclick="openReadme('${w.id}')">📋 التعليمات</button>` : ''}
+    <button class="btn btn-dl" style="flex:0 0 auto;padding:10px 16px" onclick="shareWork('${w.id}')">🔗 مشاركة</button>
+    ${w.isBinary ? '' : `<button class="btn btn-dl" style="flex:0 0 auto;padding:10px 16px" onclick="copyWorkCode('${w.id}')">⧉ نسخ الكود</button>`}
+    <button class="btn btn-dl" style="flex:0 0 auto;padding:10px 16px" onclick="downloadWork('${w.id}')">⬇ تحميل</button>
+  `;
+
+  document.getElementById('detailOverlay').classList.add('show');
+  loadDetailComments(id);
+}
+
+function renderDetailStars(w){
+  const anonId = getAnonId();
+  const myRating = (w.ratings && w.ratings[anonId]) || 0;
+  document.getElementById('detailStars').innerHTML = [1,2,3,4,5].map(i =>
+    `<span class="detail-star ${i<=myRating?'active':''}" onclick="rateWorkAnon('${w.id}',${i})">${i<=myRating?'⭐':'☆'}</span>`
+  ).join('');
+  document.getElementById('detailAvg').textContent = w.rating
+    ? `(⭐ ${Number(w.rating).toFixed(1)} من ${w.ratingCount||0} تقييم)`
+    : '(لا يوجد تقييم بعد)';
+}
+
+async function rateWorkAnon(id, stars){
+  const w = works.find(x=>x.id===id);
+  if(!w) return;
+  if(!fbReady){ showToast('تعذّر الاتصال بقاعدة البيانات', true); return; }
+  try{
+    const { doc, updateDoc } = window._fb();
+    const anonId = getAnonId();
+    const ratings = {...(w.ratings||{})};
+    ratings[anonId] = stars;
+    const vals = Object.values(ratings);
+    const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+    await updateDoc(doc(window._db, 'works', id), { ratings, rating: avg, ratingCount: vals.length });
+    w.ratings = ratings; w.rating = avg; w.ratingCount = vals.length;
+    renderDetailStars(w);
+    renderGallery();
+    showToast('⭐ تقييمك: ' + stars + ' نجوم!');
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر حفظ التقييم', true);
+  }
+}
+
+function timeAgo(ts){
+  const ms = ts && ts.toMillis ? ts.toMillis() : (ts && ts.seconds ? ts.seconds*1000 : Date.now());
+  const diff = Math.max(0, Date.now() - ms);
+  const mins = Math.floor(diff/60000);
+  if(mins < 1) return 'الآن';
+  if(mins < 60) return `منذ ${mins} د`;
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return `منذ ${hrs} س`;
+  const days = Math.floor(hrs/24);
+  return `منذ ${days} يوم`;
+}
+
+function buildCommentEl(id, c, workId, isReply){
+  const anonId = getAnonId();
+  const liked = (c.likedBy||[]).includes(anonId);
+  const name = c.name && c.name.trim() ? c.name.trim() : 'زائر';
+  const initial = name.trim().charAt(0).toUpperCase() || '؟';
+  const canDelete = !!window._currentUser; // حذف التعليقات متاح للأدمن فقط
+  return `
+    <div class="comment-item ${isReply?'reply':''}">
+      <div class="comment-av">${escapeHtml(initial)}</div>
+      <div class="comment-body">
+        <div class="comment-name">${escapeHtml(name)}</div>
+        <div class="comment-txt">${escapeHtml(c.text||'')}</div>
+        <div class="comment-actions">
+          <span style="color:var(--muted);font-size:.7rem">${timeAgo(c.createdAt)}</span>
+          <button class="comment-action-btn ${liked?'liked':''}" onclick="toggleCommentLike('${workId}','${id}')">${liked?'❤️':'🤍'} ${c.likes||0}</button>
+          ${!isReply ? `<button class="comment-action-btn" onclick="startReply('${id}','${escapeHtml(name).replace(/'/g,"\\'")}')">↩ رد</button>` : ''}
+          ${canDelete ? `<button class="comment-action-btn" onclick="adminDeleteComment('${workId}','${id}')">🗑️ حذف</button>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function loadDetailComments(workId){
+  const box = document.getElementById('detailComments');
+  box.innerHTML = '<div class="comment-empty">جاري التحميل...</div>';
+  if(!fbReady){ box.innerHTML = '<div class="comment-empty">تعذّر الاتصال بقاعدة البيانات</div>'; return; }
+  try{
+    const { collection, getDocs, query, orderBy } = window._fb();
+    const q = query(collection(window._db, 'works', workId, 'comments'), orderBy('createdAt','asc'));
+    const snap = await getDocs(q);
+    if(snap.empty){ box.innerHTML = '<div class="comment-empty">لا توجد تعليقات بعد 💬 كن أول من يعلّق</div>'; return; }
+    const all = []; snap.forEach(d => all.push({ id:d.id, ...d.data() }));
+    const roots = all.filter(c => !c.parentId);
+    let html = '';
+    roots.forEach(c => {
+      html += buildCommentEl(c.id, c, workId, false);
+      all.filter(r => r.parentId === c.id).forEach(r => {
+        html += buildCommentEl(r.id, r, workId, true);
+      });
+    });
+    box.innerHTML = html || '<div class="comment-empty">لا توجد تعليقات بعد 💬 كن أول من يعلّق</div>';
+  }catch(err){
+    console.error(err);
+    box.innerHTML = '<div class="comment-empty">تعذّر تحميل التعليقات</div>';
+  }
+}
+
+function startReply(commentId, name){
+  replyTarget = { id: commentId, name };
+  document.getElementById('replyContextLabel').textContent = `الرد على: ${name}`;
+  document.getElementById('replyContext').style.display = 'flex';
+  document.getElementById('commentTextInp').focus();
+}
+function cancelReply(){
+  replyTarget = null;
+  document.getElementById('replyContext').style.display = 'none';
+}
+
+let _lastCommentTime = 0;
+async function submitComment(){
+  const workId = currentDetailId;
+  if(!workId) return;
+  const nameInp = document.getElementById('commentNameInp');
+  const textInp = document.getElementById('commentTextInp');
+  const text = textInp.value.trim();
+  const name = nameInp.value.trim() || getAnonName() || 'زائر';
+  if(!text){ showToast('اكتب تعليقًا أولًا', true); return; }
+  if(text.length > 500){ showToast('التعليق طويل جدًا — الحد الأقصى 500 حرف', true); return; }
+  const now = Date.now();
+  if(now - _lastCommentTime < 4000){ showToast('⚠️ انتظر قليلًا قبل التعليق مجددًا', true); return; }
+  if(!fbReady){ showToast('تعذّر الاتصال بقاعدة البيانات', true); return; }
+  try{
+    const { collection, addDoc, serverTimestamp } = window._fb();
+    setAnonName(name);
+    await addDoc(collection(window._db, 'works', workId, 'comments'), {
+      name, text,
+      anonId: getAnonId(),
+      parentId: replyTarget ? replyTarget.id : null,
+      likes: 0, likedBy: [],
+      createdAt: serverTimestamp()
+    });
+    _lastCommentTime = now;
+    textInp.value = '';
+    cancelReply();
+    loadDetailComments(workId);
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر إرسال التعليق', true);
+  }
+}
+
+async function toggleCommentLike(workId, commentId){
+  if(!fbReady) return;
+  try{
+    const { doc, getDoc, updateDoc } = window._fb();
+    const ref = doc(window._db, 'works', workId, 'comments', commentId);
+    const snap = await getDoc(ref);
+    if(!snap.exists()) return;
+    const c = snap.data();
+    const anonId = getAnonId();
+    const likedBy = c.likedBy || [];
+    const idx = likedBy.indexOf(anonId);
+    if(idx === -1) likedBy.push(anonId); else likedBy.splice(idx,1);
+    await updateDoc(ref, { likedBy, likes: likedBy.length });
+    loadDetailComments(workId);
+  }catch(err){
+    console.error(err);
+  }
+}
+
+async function adminDeleteComment(workId, commentId){
+  if(!window._currentUser) return;
+  if(!confirm('حذف هذا التعليق؟')) return;
+  try{
+    const { doc, deleteDoc } = window._fb();
+    await deleteDoc(doc(window._db, 'works', workId, 'comments', commentId));
+    showToast('🗑️ تم حذف التعليق');
+    loadDetailComments(workId);
+  }catch(err){
+    console.error(err);
+    showToast('تعذّر الحذف', true);
+  }
 }
 
 /* ---------------- المودالات ---------------- */
@@ -1572,7 +1917,6 @@ function renderAdminList(){
         <span>${GENRE_LABELS[w.genre]||'أخرى'} · ${w.size ? (w.size/1024).toFixed(1)+' كيلوبايت' : ''} · ▶ ${w.viewCount||0}</span>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="del-btn" style="color:var(--cyan)" onclick="editWork('${w.id}')">تعديل</button>
         <button class="del-btn" onclick="deleteWork('${w.id}')">حذف</button>
       </div>
     </div>
