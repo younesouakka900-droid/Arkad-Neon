@@ -475,11 +475,11 @@ body.is-admin .card-edit-fab{display:flex;}
 .detail-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
 .detail-head b{font-family:'Cairo';font-size:1.05rem;}
 .detail-scroll{overflow-y:auto;}
-.detail-body{padding:20px;display:flex;gap:22px;}
-.detail-cover{width:170px;aspect-ratio:4/3;border-radius:14px;overflow:hidden;flex-shrink:0;
-  background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:3rem;}
-.detail-cover img{width:100%;height:100%;object-fit:cover;}
-.detail-info{flex:1;min-width:0;}
+.detail-body{display:flex;flex-direction:column;}
+.detail-cover{width:100%;height:210px;flex-shrink:0;position:relative;overflow:hidden;
+  background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:3.4rem;}
+.detail-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+.detail-info{padding:20px;min-width:0;}
 .detail-title{font-family:'Cairo';font-weight:900;font-size:1.35rem;margin-bottom:6px;}
 .detail-meta-line{color:var(--muted);font-size:.82rem;margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
 .detail-desc-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;
@@ -523,10 +523,6 @@ body.is-admin .card-edit-fab{display:flex;}
 .comment-send{padding:0 20px;border:none;border-radius:10px;cursor:pointer;
   background:linear-gradient(90deg,var(--cyan),var(--violet));color:#050110;font-weight:800;font-family:'Cairo';font-size:.85rem;}
 .card-rating-chip{color:var(--cyan);}
-@media(max-width:640px){
-  .detail-body{flex-direction:column;}
-  .detail-cover{width:100%;max-width:220px;margin:0 auto;aspect-ratio:16/9;}
-}
 
 /* ---------- روابط الفوتر ---------- */
 .footer-links{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:10px;flex-wrap:wrap;}
@@ -580,20 +576,6 @@ body.is-admin .card-edit-fab{display:flex;}
 .link-btn{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;text-decoration:underline;margin-top:10px;}
 
 /* ---------- لوحة التحكم ---------- */
-.manage-btn{
-  width:100%;padding:12px;border-radius:10px;cursor:pointer;margin-top:10px;
-  background:var(--surface2);border:1px solid var(--border);color:var(--text);
-  font-family:'Tajawal';font-weight:700;font-size:.88rem;
-}
-.manage-btn:hover{border-color:var(--cyan);color:var(--cyan);}
-.manage-panel{width:100%;max-width:600px;max-height:85vh;overflow-y:auto;background:var(--surface);
-  border:1px solid var(--border);border-radius:var(--radius);padding:28px;position:relative;}
-.manage-panel h2{font-family:'Cairo';margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
-.manage-search{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);
-  background:var(--bg2);color:var(--text);font-family:'Tajawal';font-size:.88rem;margin-bottom:16px;}
-.manage-search:focus{outline:none;border-color:var(--cyan);}
-.manage-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:30px 0;}
-
 .admin-panel{width:100%;max-width:640px;max-height:85vh;overflow-y:auto;background:var(--surface);
   border:1px solid var(--border);border-radius:var(--radius);padding:28px;}
 .admin-panel h2{font-family:'Cairo';margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;}
@@ -603,11 +585,6 @@ body.is-admin .card-edit-fab{display:flex;}
 }
 .file-drop:hover{border-color:var(--cyan);color:var(--cyan);}
 .file-drop.has-file{border-color:var(--lime);color:var(--lime);border-style:solid;}
-.admin-list{margin-top:24px;border-top:1px solid var(--border);padding-top:18px;}
-.admin-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;}
-.admin-row .info{flex:1;min-width:0;}
-.admin-row .info b{font-size:.9rem;display:block;}
-.admin-row .info span{font-size:.75rem;color:var(--muted);}
 .del-btn{background:none;border:1px solid var(--border);color:var(--magenta);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;}
 .del-btn:hover{background:rgba(255,43,214,.1);border-color:var(--magenta);}
 
@@ -920,18 +897,7 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
     </div>
     <button class="submit-btn" id="uploadBtn" onclick="uploadWork()">نشر العمل</button>
     <button class="link-btn" id="cancelEditBtn" onclick="clearForm()" style="display:none">إلغاء التعديل والعودة لنشر عمل جديد</button>
-    <button class="manage-btn" onclick="openManageWorks()">📋 إدارة الأعمال المنشورة (<span id="manageCount">0</span>)</button>
-  </div>
-</div>
-
-<!-- صفحة إدارة الأعمال (تعديل / حذف) -->
-<div class="modal-overlay" id="manageOverlay">
-  <div class="manage-panel">
-    <h2>إدارة الأعمال المنشورة
-      <button class="icon-btn" onclick="closeModal('manageOverlay')" title="إغلاق">✕</button>
-    </h2>
-    <input type="text" class="manage-search" id="manageSearch" placeholder="ابحث عن عمل بالاسم..." oninput="renderAdminList()">
-    <div id="adminList"></div>
+    <button class="del-btn" id="deleteEditBtn" onclick="deleteCurrentEditWork()" style="display:none;width:100%;margin-top:10px;padding:12px;border-radius:10px;">🗑️ حذف هذا العمل نهائيًا</button>
   </div>
 </div>
 
@@ -1124,7 +1090,6 @@ document.addEventListener('fbReady', () => { fbReady = true; loadWorks(); });
 document.addEventListener('authChanged', (e) => {
   const user = e.detail;
   document.body.classList.toggle('is-admin', !!user);
-  if (user) { renderAdminList(); }
   renderGallery();
   if (currentDetailId && document.getElementById('detailOverlay').classList.contains('show')) {
     loadDetailComments(currentDetailId);
@@ -1169,8 +1134,6 @@ function openSharedWorkFromUrl(){
 function updateStats(){
   countUpTo('statTotal', works.length);
   countUpTo('statGenres', new Set(works.map(w=>w.genre)).size);
-  const mc = document.getElementById('manageCount');
-  if(mc) mc.textContent = works.length;
 }
 function countUpTo(id, target){
   const el = document.getElementById(id);
@@ -1698,7 +1661,6 @@ function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 function openAdminPanel(){
   closeModal('authOverlay');
   document.getElementById('adminOverlay').classList.add('show');
-  renderAdminList();
 }
 
 /* ---------------- تسجيل الدخول ---------------- */
@@ -1834,7 +1796,6 @@ async function uploadWork(){
 
     clearForm();
     await loadWorks();
-    renderAdminList();
   }catch(err){
     console.error(err);
     showToast('حدث خطأ أثناء الحفظ', true);
@@ -1868,8 +1829,8 @@ function editWork(id){
 
   document.getElementById('uploadBtn').textContent = 'حفظ التعديلات';
   document.getElementById('cancelEditBtn').style.display = 'block';
+  document.getElementById('deleteEditBtn').style.display = 'block';
 
-  closeModal('manageOverlay');
   document.getElementById('adminOverlay').classList.add('show');
   document.querySelector('.admin-panel').scrollTo({top:0, behavior:'smooth'});
   showToast(`تعديل: ${w.title}`);
@@ -1894,33 +1855,7 @@ function clearForm(){
   tdrop.classList.remove('has-file');
   document.getElementById('uploadBtn').textContent = 'نشر العمل';
   document.getElementById('cancelEditBtn').style.display = 'none';
-}
-
-
-/* ---------------- إدارة القائمة (تعديل / حذف) ---------------- */
-function openManageWorks(){
-  closeModal('adminOverlay');
-  document.getElementById('manageOverlay').classList.add('show');
-  document.getElementById('manageSearch').value = '';
-  renderAdminList();
-}
-function renderAdminList(){
-  const list = document.getElementById('adminList');
-  const q = (document.getElementById('manageSearch')?.value || '').trim().toLowerCase();
-  const filtered = q ? works.filter(w => (w.title||'').toLowerCase().includes(q)) : works;
-  if(!works.length){ list.innerHTML = '<p class="manage-empty">لا توجد أعمال منشورة بعد.</p>'; return; }
-  if(!filtered.length){ list.innerHTML = '<p class="manage-empty">لا توجد نتائج مطابقة للبحث.</p>'; return; }
-  list.innerHTML = filtered.map(w => `
-    <div class="admin-row">
-      <div class="info">
-        <b>${escapeHtml(w.title)}</b>
-        <span>${GENRE_LABELS[w.genre]||'أخرى'} · ${w.size ? (w.size/1024).toFixed(1)+' كيلوبايت' : ''} · ▶ ${w.viewCount||0}</span>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="del-btn" onclick="deleteWork('${w.id}')">حذف</button>
-      </div>
-    </div>
-  `).join('');
+  document.getElementById('deleteEditBtn').style.display = 'none';
 }
 
 async function deleteWork(id){
@@ -1930,10 +1865,15 @@ async function deleteWork(id){
     await deleteDoc(doc(window._db, 'works', id));
     showToast('تم الحذف');
     await loadWorks();
-    renderAdminList();
   }catch(err){
     showToast('تعذّر الحذف', true);
   }
+}
+
+async function deleteCurrentEditWork(){
+  if(!editingId) return;
+  await deleteWork(editingId);
+  clearForm();
 }
 
 // إغلاق المودال عند الضغط خارج المحتوى
