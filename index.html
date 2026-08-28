@@ -285,6 +285,14 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
   font-size:.68rem;font-weight:800;padding:3px 9px;border-radius:99px;
   background:linear-gradient(90deg,var(--lime),#8fe000);color:#0a1a00;letter-spacing:.3px;
 }
+.thumb-price{
+  position:absolute;bottom:10px;left:10px;z-index:3;
+  font-size:.7rem;font-weight:800;padding:4px 12px;border-radius:99px;letter-spacing:.3px;
+  backdrop-filter:blur(6px);display:flex;align-items:center;gap:4px;
+}
+.thumb-price.is-paid{background:linear-gradient(90deg,#ff2bd6,#8b2ffb);color:#fff;}
+.thumb-price.is-free{background:rgba(198,255,61,.16);border:1px solid rgba(198,255,61,.4);color:var(--lime);}
+.card-lock-note{color:var(--muted);font-size:.78rem;text-align:center;padding:8px 0 2px;}
 /* زر التعديل السريع (الترس) — يظهر فقط عند تسجيل دخول الأدمن */
 .card-edit-fab{
   display:none;position:absolute;top:10px;right:10px;z-index:5;
@@ -877,6 +885,27 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
       </select>
     </div>
     <div class="field">
+      <label>نوع العمل</label>
+      <select id="fPaid" onchange="togglePaidFields()">
+        <option value="free">🆓 مجاني</option>
+        <option value="paid">💎 مدفوع</option>
+      </select>
+    </div>
+    <div id="paidFieldsGroup" style="display:none">
+      <div class="field">
+        <label>السعر (نص للعرض فقط، اختياري)</label>
+        <input type="text" id="fPrice" placeholder="مثال: 29 درهم">
+      </div>
+      <div class="field">
+        <label>رابط الشراء (Alfan أو أي منصة أخرى)</label>
+        <input type="text" id="fAlfanUrl" placeholder="https://alfan.io/...">
+      </div>
+      <div class="field">
+        <label>كود التفعيل (يُرسل للمشتري بعد الدفع)</label>
+        <input type="text" id="fUnlockCode" placeholder="مثال: Moon2026">
+      </div>
+    </div>
+    <div class="field">
       <label>وصف مختصر</label>
       <textarea id="fDesc" placeholder="جملة أو جملتين عن العمل..."></textarea>
     </div>
@@ -952,6 +981,16 @@ let sortMode = 'category';
 let pendingFile = null; // {name, content, size}
 let pendingThumb = null; // {name, dataUrl, size}
 let fbReady = false;
+const unlockedWorks = new Set(); // معرّفات الأعمال المدفوعة التي أُدخل لها كود صحيح خلال هذه الجلسة
+
+function isWorkUnlocked(w){
+  return !w.isPaid || unlockedWorks.has(w.id) || document.body.classList.contains('is-admin');
+}
+
+function togglePaidFields(){
+  const isPaid = document.getElementById('fPaid').value === 'paid';
+  document.getElementById('paidFieldsGroup').style.display = isPaid ? 'block' : 'none';
+}
 
 const GENRE_LABELS = {
   game:'لعبة', app:'تطبيق', tool:'أداة', website:'موقع ويب', blogger:'قالب بلوغر',
@@ -1207,6 +1246,10 @@ function renderCard(w){
   const isNew = w.createdAt && isWithinDays(w.createdAt, 7);
   const views = w.viewCount || 0;
   const sizeKb = w.size ? (w.size/1024).toFixed(1) : null;
+  const locked = w.isPaid && !isWorkUnlocked(w);
+  const priceBadge = w.isPaid
+    ? `<span class="thumb-price is-paid">💎 مدفوع${w.price ? ' · ' + escapeHtml(w.price) : ''}</span>`
+    : `<span class="thumb-price is-free">🆓 مجاني</span>`;
   return `
     <div class="card" onclick="openWorkDetail('${w.id}')">
       <div class="card-inner">
@@ -1216,6 +1259,7 @@ function renderCard(w){
             : `<span>${GENRE_ICON[w.genre]||'✨'}</span>`}
           <span class="thumb-tag">${GENRE_LABELS[w.genre]||'أخرى'}</span>
           ${isNew ? `<span class="thumb-new">جديد</span>` : ''}
+          ${priceBadge}
           <button class="card-edit-fab" title="تعديل سريع" onclick="event.stopPropagation(); editWork('${w.id}')">⚙️</button>
         </div>
         <div class="card-body">
@@ -1228,6 +1272,13 @@ function renderCard(w){
             ${sizeKb ? `<span>💾 ${sizeKb} ك.ب</span>` : ''}
             ${w.rating ? `<span class="card-rating-chip">⭐ ${Number(w.rating).toFixed(1)}</span>` : ''}
           </div>
+          ${locked ? `
+          <div class="card-actions" onclick="event.stopPropagation();">
+            <button class="btn btn-play" onclick="openWorkDetail('${w.id}')">💎 التفاصيل والشراء</button>
+            ${w.readme && w.readme.trim() ? `<button class="btn btn-dl" onclick="openReadme('${w.id}')" title="التعليمات">📋</button>` : ''}
+            <button class="btn btn-dl" onclick="shareWork('${w.id}')" title="مشاركة">🔗</button>
+          </div>
+          ` : `
           <div class="card-actions" onclick="event.stopPropagation();">
             ${w.isBinary
               ? `<button class="btn btn-play" onclick="downloadWork('${w.id}')">⬇ تنزيل الملف</button>`
@@ -1237,6 +1288,7 @@ function renderCard(w){
             ${w.isBinary ? '' : `<button class="btn btn-dl" onclick="copyWorkCode('${w.id}')" title="نسخ الكود">⧉</button>`}
             <button class="btn btn-dl" onclick="downloadWork('${w.id}')" title="تحميل">⬇</button>
           </div>
+          `}
         </div>
       </div>
     </div>
@@ -1307,6 +1359,7 @@ function setFilter(genre, btn){
 async function playWork(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
+  if(w.isPaid && !isWorkUnlocked(w)){ showToast('هذا عمل مدفوع — أدخل كود التفعيل أولًا', true); return; }
   const ext = (w.ext || 'html').toLowerCase();
   if(w.isBinary){
     showToast(`ملفات .${ext} لا يمكن تشغيلها داخل المتصفح — استخدم زر التحميل ⬇`, true);
@@ -1367,6 +1420,7 @@ function toggleFrameFullscreen(){
 async function copyWorkCode(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
+  if(w.isPaid && !isWorkUnlocked(w)){ showToast('هذا عمل مدفوع — أدخل كود التفعيل أولًا', true); return; }
   if(w.isBinary){
     showToast('لا يمكن نسخ كود ملف ثنائي مثل AIA — استخدم زر التحميل ⬇', true);
     return;
@@ -1411,6 +1465,7 @@ function triggerDataUrlDownload(dataUrl, filename){
 async function downloadWork(id){
   const w = works.find(x=>x.id===id);
   if(!w || !w.html) return;
+  if(w.isPaid && !isWorkUnlocked(w)){ showToast('هذا عمل مدفوع — أدخل كود التفعيل أولًا', true); return; }
   const ext = (w.ext || 'html').toLowerCase();
   const filename = (w.title || 'work').replace(/[^\p{L}\p{N}\-_ ]/gu,'').trim() + '.' + ext;
   try{
@@ -1492,6 +1547,28 @@ async function openWorkDetail(id){
   renderDetailStars(w);
 
   const actions = document.getElementById('detailActions');
+  if(w.isPaid && !isWorkUnlocked(w)){
+    actions.innerHTML = `
+      <div style="width:100%">
+        <button class="btn-buy" id="detailBuyBtn" onclick="window.open('${w.alfanUrl||'#'}','_blank')">🛒 شراء الكود${w.price ? ' · ' + escapeHtml(w.price) : ''}</button>
+        <div class="unlock-box" id="detailUnlockBox">
+          <div class="unlock-row">
+            <input type="text" class="unlock-input" id="detailUnlockInput"
+                   placeholder="أدخل كود التفعيل لفتح العمل"
+                   onkeydown="if(event.key==='Enter') verifyWorkCode('${w.id}')">
+            <button class="unlock-confirm" onclick="verifyWorkCode('${w.id}')">تأكيد</button>
+          </div>
+          <div class="unlock-msg" id="detailUnlockMsg"></div>
+        </div>
+        <div class="card-lock-note">💎 هذا عمل مدفوع — التشغيل والتحميل والنسخ تُفتح بعد إدخال كود التفعيل الصحيح.</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          ${w.readme && w.readme.trim() ? `<button class="btn btn-dl" style="flex:0 0 auto;padding:10px 16px" onclick="openReadme('${w.id}')">📋 التعليمات</button>` : ''}
+          <button class="btn btn-dl" style="flex:0 0 auto;padding:10px 16px" onclick="shareWork('${w.id}')">🔗 مشاركة</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
   actions.innerHTML = `
     ${w.isBinary
       ? `<button class="btn btn-play" onclick="closeModal('detailOverlay'); downloadWork('${w.id}')">⬇ تنزيل الملف</button>`
@@ -1504,6 +1581,33 @@ async function openWorkDetail(id){
 
   document.getElementById('detailOverlay').classList.add('show');
   loadDetailComments(id);
+}
+
+function verifyWorkCode(id){
+  const w = works.find(x=>x.id===id);
+  const input = document.getElementById('detailUnlockInput');
+  const msg = document.getElementById('detailUnlockMsg');
+  if(!w || !input) return;
+
+  const entered = input.value.trim();
+  if(!entered){
+    msg.textContent = 'يرجى إدخال الكود أولاً.';
+    msg.className = 'unlock-msg err';
+    return;
+  }
+
+  if(entered === w.unlockCode){
+    unlockedWorks.add(w.id);
+    msg.textContent = '';
+    showToast('تم فتح العمل بنجاح ✅');
+    openWorkDetail(id); // إعادة رسم الأزرار بالوضع المفتوح
+    renderGallery(); // تحديث البطاقة في المعرض أيضًا
+  }else{
+    msg.textContent = '❌ الكود غير صحيح. تأكد من الكود المرسل إليك بعد إتمام الشراء.';
+    msg.className = 'unlock-msg err';
+    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
+    input.value = '';
+  }
 }
 
 function renderDetailStars(w){
@@ -1772,10 +1876,15 @@ async function uploadWork(){
   const genre = document.getElementById('fGenre').value;
   const desc  = document.getElementById('fDesc').value.trim();
   const readme = document.getElementById('fReadme').value.trim();
+  const isPaid = document.getElementById('fPaid').value === 'paid';
+  const price = document.getElementById('fPrice').value.trim();
+  const alfanUrl = document.getElementById('fAlfanUrl').value.trim();
+  const unlockCode = document.getElementById('fUnlockCode').value.trim();
 
   if(!title){ showToast('أدخل عنوان العمل', true); return; }
   // بوضع التعديل: ملف الـ HTML اختياري (نحتفظ بالقديم إن لم يُستبدل)
   if(!editingId && !pendingFile){ showToast('اختر ملف HTML أولًا', true); return; }
+  if(isPaid && (!alfanUrl || !unlockCode)){ showToast('أدخل رابط الشراء وكود التفعيل للعمل المدفوع', true); return; }
 
   // نستخدم طول المحتوى المُخزَّن فعليًا (بعد ترميز Base64 للملفات الثنائية مثل aia)
   // لأنه هو ما يُكتب فعلًا داخل مستند Firestore، وليس حجم الملف الأصلي.
@@ -1794,7 +1903,13 @@ async function uploadWork(){
 
     if(editingId){
       // تعديل عمل موجود — نحدّث فقط الحقول اللي تغيّرت
-      const updates = { title, genre, description:desc, readme };
+      const updates = {
+        title, genre, description:desc, readme,
+        isPaid,
+        price: isPaid ? (price || null) : null,
+        alfanUrl: isPaid ? alfanUrl : null,
+        unlockCode: isPaid ? unlockCode : null
+      };
       if(pendingFile){
         updates.html = pendingFile.content;
         updates.size = pendingFile.size;
@@ -1808,6 +1923,10 @@ async function uploadWork(){
       // نشر عمل جديد
       await addDoc(collection(window._db, 'works'), {
         title, genre, description:desc, readme,
+        isPaid,
+        price: isPaid ? (price || null) : null,
+        alfanUrl: isPaid ? alfanUrl : null,
+        unlockCode: isPaid ? unlockCode : null,
         html: pendingFile.content,
         ext: pendingFile.ext,
         isBinary: pendingFile.isBinary,
@@ -1842,6 +1961,11 @@ function editWork(id){
   document.getElementById('fGenre').value = w.genre || 'game';
   document.getElementById('fDesc').value = w.description || '';
   document.getElementById('fReadme').value = w.readme || '';
+  document.getElementById('fPaid').value = w.isPaid ? 'paid' : 'free';
+  document.getElementById('fPrice').value = w.price || '';
+  document.getElementById('fAlfanUrl').value = w.alfanUrl || '';
+  document.getElementById('fUnlockCode').value = w.unlockCode || '';
+  togglePaidFields();
 
   const drop = document.getElementById('fileDrop');
   drop.textContent = `📄 الملف الحالي محفوظ (${w.size ? (w.size/1024).toFixed(1)+' ك.ب' : ''}) — اضغط لاستبداله فقط إن أردت`;
@@ -1865,6 +1989,11 @@ function clearForm(){
   document.getElementById('fDesc').value = '';
   document.getElementById('fReadme').value = '';
   document.getElementById('fGenre').value = 'game';
+  document.getElementById('fPaid').value = 'free';
+  document.getElementById('fPrice').value = '';
+  document.getElementById('fAlfanUrl').value = '';
+  document.getElementById('fUnlockCode').value = '';
+  togglePaidFields();
   document.getElementById('fFile').value = '';
   document.getElementById('fThumb').value = '';
   pendingFile = null;
