@@ -534,14 +534,6 @@ body.is-admin .card-edit-fab{display:flex;}
 @media(max-width:900px){.features-strip{grid-template-columns:1fr 1fr;}}
 @media(max-width:500px){.features-strip{grid-template-columns:1fr;}}
 
-/* ---------- مكان الإعلان ---------- */
-.ad-slot{
-  max-width:1200px;margin:10px auto 0;padding:0 24px;
-}
-.ad-slot-inner{
-  min-height:90px;border:1px dashed var(--border);border-radius:12px;
-  display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.78rem;
-}
 .link-btn{background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;text-decoration:underline;margin-top:10px;}
 
 /* ---------- لوحة التحكم ---------- */
@@ -707,13 +699,6 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
   <div class="feature-item"><span class="f-icon">📱</span><div><b>متجاوب بالكامل</b><span>يعمل على كل الأجهزة</span></div></div>
 </div>
 
-<!-- مكان الإعلان -->
-<div class="ad-slot">
-  <div class="ad-slot-inner" id="adSlot">
-    <script async="async" data-cfasync="false" src="https://pl30532551.effectivecpmnetwork.com/4cdcd9cf5950f6defea6662a4d8cb9f6/invoke.js"></script>
-    <div id="container-4cdcd9cf5950f6defea6662a4d8cb9f6"></div>
-  </div>
-</div>
 <footer>
   أركيد نيون — معرض تفاعلي مبني بملف واحد ⚡
   <div class="footer-links">
@@ -1403,6 +1388,8 @@ async function openWorkDetail(id){
         </div>
       </div>
     `;
+    document.getElementById('detailOverlay').classList.add('show');
+    loadDetailComments(id);
     return;
   }
   actions.innerHTML = `
