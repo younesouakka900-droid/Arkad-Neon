@@ -338,49 +338,7 @@ body.is-admin .card-edit-fab{display:flex;}
 .btn-dl{background:var(--surface2);color:var(--text);border:1px solid var(--border);flex:0 0 44px;}
 .btn-dl:hover{border-color:var(--cyan);color:var(--cyan);}
 
-/* ---------- بطاقات المشاريع المدفوعة (Premium) ---------- */
-.premium-section{max-width:1180px;margin:10px auto 50px;padding:0 24px;}
-.premium-section-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
-.premium-section-head h2{font-family:'Cairo';font-weight:900;font-size:1.3rem;
-  background:linear-gradient(90deg,var(--lime),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent;}
-.premium-section-head span{font-size:1.3rem;}
-.premium-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;}
-
-.prem-card{
-  position:relative;border-radius:var(--radius);
-  background:var(--surface);border:1px solid rgba(198,255,61,.25);
-  overflow:hidden;transition:transform .25s;
-}
-.prem-card:hover{transform:translateY(-6px);}
-.prem-card::before{
-  content:'';position:absolute;inset:-2px;border-radius:calc(var(--radius) + 2px);
-  background:conic-gradient(from var(--a,0deg),var(--lime),var(--cyan),var(--magenta),var(--lime));
-  z-index:0;opacity:0;transition:opacity .35s;animation:spin 3.5s linear infinite;
-}
-.prem-card:hover::before{opacity:1;}
-.prem-card-inner{position:relative;z-index:1;background:var(--surface);border-radius:var(--radius);height:100%;overflow:hidden;}
-
-.prem-thumb{height:150px;position:relative;overflow:hidden;background:linear-gradient(135deg,#160f34,#0a0620);}
-.prem-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.prem-thumb::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(15,10,36,.9));}
-.prem-badge{
-  position:absolute;top:10px;right:10px;z-index:3;font-size:.7rem;font-weight:800;
-  padding:4px 12px;border-radius:99px;letter-spacing:.3px;
-  background:linear-gradient(90deg,var(--lime),#8fe000);color:#0a1a00;
-  display:flex;align-items:center;gap:4px;
-}
-
-.prem-body{padding:16px 18px 18px;}
-.prem-title{font-family:'Cairo';font-weight:800;font-size:1.05rem;margin-bottom:6px;}
-.prem-desc{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:14px;
-  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-
-.prem-actions{display:flex;gap:8px;margin-bottom:10px;}
-.btn-preview{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);
-  background:var(--surface2);color:var(--text);font-family:'Tajawal';font-weight:700;font-size:.85rem;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s;}
-.btn-preview:hover{border-color:var(--cyan);color:var(--cyan);}
-
+/* ---------- واجهة الشراء وفتح كود التفعيل (تُستخدم داخل نافذة تفاصيل العمل المدفوع) ---------- */
 .btn-buy{
   width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;
   font-family:'Cairo';font-weight:800;font-size:.9rem;
@@ -729,14 +687,6 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
   </div>
 </div>
 
-<div class="premium-section" id="premiumSection">
-  <div class="premium-section-head">
-    <span>💎</span>
-    <h2>مشاريع مدفوعة — الكود الكامل</h2>
-  </div>
-  <div class="premium-grid" id="premiumGrid"></div>
-</div>
-
 <div class="promo-grid">
   <div class="promo-card promo-purple">
     <h3>شارك أعمالك مع المجتمع</h3>
@@ -1013,120 +963,6 @@ const GENRE_GRADIENT = {
   news:       'linear-gradient(135deg,#0a0a3a,#3a3a8a)',
   other:      'linear-gradient(135deg,#2a0a2a,#8a1a6a)'
 };
-
-/* =========================================================
-   بطاقات المشاريع المدفوعة (Premium) — Alfan
-   كل شيء يُدار من هنا فقط، بدون أي اتصال بقاعدة البيانات.
-   لإضافة مشروع جديد: انسخ كائناً وعدّل قيمه.
-   ملاحظة أمان: هذا تحقق من جهة العميل (Client-side) فقط،
-   أي شخص يفتح "أدوات المطوّر" يمكنه رؤية الكود ورابط التحميل
-   داخل الكود المصدري. هو مناسب كحاجز بسيط بعد الشراء عبر Alfan
-   (لمنع التحميل العشوائي)، وليس حماية حقيقية ضد شخص مصمم
-   على استخراج الكود يدويًا.
-   ========================================================= */
-const PREMIUM_PROJECTS = [
-  {
-    id: 'nexus9',                                   // مُعرّف فريد للمشروع
-    title: 'NEXUS-9',                                // عنوان البطاقة
-    description: 'واجهة سايبربانك تفاعلية كاملة، ملف HTML واحد جاهز للتخصيص والدمج في أي مشروع.',
-    image: '',                                        // رابط صورة المشروع (اتركه فارغاً لعرض تدرج افتراضي)
-    previewUrl: 'https://arkad-neon.vercel.app/nexus9', // رابط المعاينة الحية
-    alfanUrl: 'https://alfan.io/alfan/nexus9',        // رابط صفحة الشراء على Alfan
-    price: '29 درهم',                                 // نص السعر (اختياري، للعرض فقط)
-    code: 'Moon2026',                                 // كود التفعيل الذي يُرسل للمشتري بعد الدفع
-    downloadUrl: 'https://arkad-neon.vercel.app/files/nexus9-full.zip' // رابط الملف الحقيقي (يظهر فقط بعد إدخال الكود الصحيح)
-  }
-  // أضف مشاريع أخرى هنا بنفس الشكل...
-];
-
-function renderPremiumCards(){
-  const grid = document.getElementById('premiumGrid');
-  if(!grid) return;
-  if(!PREMIUM_PROJECTS.length){
-    document.getElementById('premiumSection').style.display = 'none';
-    return;
-  }
-  grid.innerHTML = PREMIUM_PROJECTS.map(p => `
-    <div class="prem-card">
-      <div class="prem-card-inner">
-        <div class="prem-thumb" style="${p.image ? '' : 'background:linear-gradient(135deg,#160f34,#0a0620);display:flex;align-items:center;justify-content:center;font-size:2.4rem;'}">
-          ${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" loading="lazy">` : '<span style="position:relative;z-index:1;">💎</span>'}
-          <span class="prem-badge">💎 مدفوع${p.price ? ' · ' + escapeHtml(p.price) : ''}</span>
-        </div>
-        <div class="prem-body">
-          <div class="prem-title">${escapeHtml(p.title)}</div>
-          <div class="prem-desc">${escapeHtml(p.description || '')}</div>
-
-          <div class="prem-actions">
-            <button class="btn-preview" onclick="window.open('${p.previewUrl}','_blank')">👁 معاينة حية</button>
-          </div>
-
-          <button class="btn-buy" id="buyBtn-${p.id}" onclick="window.open('${p.alfanUrl}','_blank')">🛒 شراء الكود عبر Alfan</button>
-
-          <div class="unlock-box" id="unlockBox-${p.id}">
-            <div class="unlock-row">
-              <input type="text" class="unlock-input" id="unlockInput-${p.id}"
-                     placeholder="أدخل كود التفعيل لتحميل الملف"
-                     onkeydown="if(event.key==='Enter') verifyPremiumCode('${p.id}')">
-              <button class="unlock-confirm" onclick="verifyPremiumCode('${p.id}')">تأكيد</button>
-            </div>
-            <div class="unlock-msg" id="unlockMsg-${p.id}"></div>
-          </div>
-          <div style="text-align:center;margin-top:10px;">
-            <a href="policies.html#refund" target="_blank" rel="noopener" style="color:var(--muted);font-size:.72rem;text-decoration:underline;">🛡 سياسة الاسترجاع والضمان</a>
-          </div>
-
-          <button class="btn-final-dl" id="finalDl-${p.id}" style="display:none" onclick="downloadPremiumFile('${p.id}')">
-            ⬇ تحميل الملف الآن
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function verifyPremiumCode(projectId){
-  const project = PREMIUM_PROJECTS.find(p => p.id === projectId);
-  const input   = document.getElementById(`unlockInput-${projectId}`);
-  const msg     = document.getElementById(`unlockMsg-${projectId}`);
-  if(!project || !input) return;
-
-  const entered = input.value.trim();
-  if(!entered){
-    msg.textContent = 'يرجى إدخال الكود أولاً.';
-    msg.className = 'unlock-msg err';
-    return;
-  }
-
-  if(entered === project.code){
-    // كود صحيح: إخفاء الشراء والإدخال، إظهار زر التحميل
-    document.getElementById(`buyBtn-${projectId}`).style.display = 'none';
-    document.getElementById(`unlockBox-${projectId}`).style.display = 'none';
-    const finalBtn = document.getElementById(`finalDl-${projectId}`);
-    finalBtn.style.display = 'flex';
-    msg.textContent = '';
-  } else {
-    msg.textContent = '❌ الكود غير صحيح. تأكد من الكود المرسل إليك بعد إتمام الشراء عبر Alfan.';
-    msg.className = 'unlock-msg err';
-    input.classList.remove('shake'); void input.offsetWidth; input.classList.add('shake');
-    input.value = '';
-  }
-}
-
-function downloadPremiumFile(projectId){
-  const project = PREMIUM_PROJECTS.find(p => p.id === projectId);
-  if(!project || !project.downloadUrl) return;
-  const a = document.createElement('a');
-  a.href = project.downloadUrl;
-  a.download = '';
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-document.addEventListener('DOMContentLoaded', renderPremiumCards);
 
 document.addEventListener('fbReady', () => { fbReady = true; loadWorks(); });
 document.addEventListener('authChanged', (e) => {
