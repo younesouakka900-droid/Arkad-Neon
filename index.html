@@ -8,19 +8,24 @@
 <meta name="keywords" content="تطبيقات إسلامية, رفيق الصلاة, أذكار المسحبة, القرآن الكريم, أحاديث نبوية, ألعاب HTML, تطبيقات تفاعلية عربية">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://arkadneon.com/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#050110">
 <meta name="author" content="Mangaverse">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="أركيد نيون | معرض أعمال تفاعلية بملف HTML واحد">
 <meta property="og:description" content="عوالم مبنية بملف واحد تُفتح بضغطة واحدة: ألعاب، تطبيقات إسلامية، أدوات وتجارب تفاعلية.">
 <meta property="og:url" content="https://arkadneon.com/">
-<meta property="og:image" content="https://arkadneon.com/preview.jpg">
+<meta property="og:image" content="https://arkadneon.com/preview-1.jpg">
 <meta property="og:locale" content="ar_AR">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="أركيد نيون | معرض أعمال تفاعلية">
 <meta name="twitter:description" content="عوالم مبنية بملف واحد تُفتح بضغطة واحدة في متصفحك.">
-<meta name="twitter:image" content="https://arkadneon.com/preview.jpg">
+<meta name="twitter:image" content="https://arkadneon.com/preview-1.jpg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -232,6 +237,7 @@ header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rg
 .boot-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--magenta));animation:bootfill 1.5s ease forwards;border-radius:99px;}
 @keyframes bootfill{to{width:100%;}}
 .boot-caption{color:var(--muted);font-size:.72rem;letter-spacing:3px;}
+.boot-caption::after{content:'جارٍ التشغيل...';}
 @media (prefers-reduced-motion: reduce){
   .boot-logo::before,.boot-logo::after{animation:none;}
   .boot-bar-fill{animation:none;width:100%;}
@@ -549,6 +555,18 @@ body.is-admin .card-edit-fab{display:flex;}
 .del-btn{background:none;border:1px solid var(--border);color:var(--magenta);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;}
 .del-btn:hover{background:rgba(255,43,214,.1);border-color:var(--magenta);}
 
+
+/* ---------- قسم تعريفي ثابت (محتوى نصي للقراءة وللزواحف) ---------- */
+.about-seo{padding-top:34px;padding-bottom:30px;border-top:1px solid var(--border);}
+.about-seo h2{font-family:'Cairo';font-weight:900;font-size:1.35rem;margin-bottom:12px;}
+.about-seo h3{font-family:'Cairo';font-weight:800;font-size:1.02rem;margin:22px 0 8px;color:var(--cyan);}
+.about-seo p{color:var(--text);opacity:.88;line-height:1.95;max-width:72ch;font-size:.95rem;}
+.about-seo ul{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:8px 28px;max-width:900px;}
+.about-seo li{color:var(--muted);font-size:.88rem;line-height:1.7;}
+.about-seo li b{color:var(--text);font-weight:700;}
+.about-seo a{color:var(--cyan);}
+@media(max-width:700px){.about-seo ul{grid-template-columns:1fr;}}
+
 /* ---------- توست ---------- */
 .toast{
   position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
@@ -577,10 +595,10 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
 </head>
 <body>
 
-<div class="boot-overlay" id="bootOverlay">
+<div class="boot-overlay" id="bootOverlay" aria-hidden="true">
   <div class="boot-logo">أركيد نيون</div>
   <div class="boot-bar"><div class="boot-bar-fill"></div></div>
-  <div class="boot-caption">جارٍ التشغيل...</div>
+  <div class="boot-caption"></div>
 </div>
 <script>
 (function(){
@@ -626,8 +644,8 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
       <h1>عالم من الإبداع<br>يُفتح بضغطة واحدة</h1>
       <p>معرض مصغّر لأعمال HTML تفاعلية — ألعاب، تطبيقات، وتجارب — شغّلها فورًا في المتصفح أو نزّلها لجهازك.</p>
       <div class="hero-stats">
-        <div class="stat"><b id="statTotal">0</b><span>عمل منشور</span></div>
-        <div class="stat"><b id="statGenres">0</b><span>تصنيف</span></div>
+        <div class="stat"><b id="statTotal">—</b><span>عمل منشور</span></div>
+        <div class="stat"><b id="statGenres">—</b><span>تصنيف</span></div>
       </div>
     </div>
     <div class="hero-visual">
@@ -672,12 +690,32 @@ footer{border-top:1px solid var(--border);padding:26px 0;text-align:center;color
     <h2>الأعمال التفاعلية المتوفرة في أركيد نيون</h2>
     <!-- يتم تعبئة هذا القسم تلقائيًا من نفس بيانات الأعمال بعد تحميلها -->
   </div>
+  <noscript><p style="color:var(--muted);padding:20px 0">يحتاج المعرض إلى تفعيل جافاسكريبت في المتصفح لعرض الأعمال.</p></noscript>
   <div class="gallery" id="galleryGrid">
     <div class="skeleton-card" id="loadSpinner"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
     <div class="skeleton-card"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
     <div class="skeleton-card"><div class="skel-thumb"></div><div class="skel-line w90"></div><div class="skel-line w60"></div><div class="skel-line w40"></div></div>
   </div>
 </div>
+
+<section class="wrap about-seo" aria-labelledby="aboutTitle">
+  <h2 id="aboutTitle">ما هو أركيد نيون؟</h2>
+  <p>أركيد نيون معرض عربي لأعمال HTML تفاعلية. كل عمل فيه ملف واحد يعمل مباشرة في المتصفح بلا تثبيت، فتشغّله بضغطة واحدة أو تنزّله إلى جهازك. يمكنك تقييم كل عمل وكتابة تعليق عليه، وبعض الأعمال مدفوعة برابط شراء وكود تفعيل.</p>
+
+  <h3>تصنيفات المعرض</h3>
+  <ul>
+    <li><b>تطبيقات إسلامية:</b> أذكار وقرآن وأحاديث وأدوات تفيد في العبادة اليومية.</li>
+    <li><b>ألعاب:</b> ألعاب متصفح تُلعب فوراً من الهاتف أو الحاسوب.</li>
+    <li><b>تطبيقات وأدوات:</b> برامج صغيرة وأدوات مساعدة تعمل داخل الصفحة.</li>
+    <li><b>قوالب بلوغر:</b> قوالب جاهزة لمدونات بلوغر.</li>
+    <li><b>مدونات إخبارية:</b> هياكل لمواقع ومدونات الأخبار.</li>
+    <li><b>مواقع ويب وسكربتات:</b> مواقع كاملة وسكربتات يمكن إعادة استخدامها.</li>
+    <li><b>منصات نشر وقراءة:</b> منصات لعرض المحتوى وقراءته.</li>
+  </ul>
+
+  <h3>شارك عملك</h3>
+  <p>إن كان عندك لعبة أو أداة أو قالب مبني بملف HTML واحد، يمكنك مراسلتنا لإضافته إلى المعرض. تجد طرق التواصل في <a href="profile.html">صفحة التعريف</a>، وشروط الاستخدام والخصوصية في <a href="policies.html">هذه الصفحة</a>.</p>
+</section>
 
 <div class="promo-grid">
   <div class="promo-card promo-purple">
